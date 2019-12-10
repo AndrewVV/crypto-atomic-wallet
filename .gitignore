@@ -102,3 +102,13 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Other files
+.DS_Store
+src/.DS_Store
+src/background/.DS_Store
+src/background/libs/.DS_Store
+build/background.js.map
+build/content.js.map
+build/popup.js.map
+build/content.css.map
