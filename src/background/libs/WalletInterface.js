@@ -1,7 +1,7 @@
-import EdcLib from './EdcLib.js';
-import EcroLib from './EcroLib.js';
-import EdcTestLib from './EdcTestLib.js';
-import EcroTestLib from './EcroTestLib.js';
+// import EdcLib from './EdcLib.js';
+// import EcroLib from './EcroLib.js';
+// import EdcTestLib from './EdcTestLib.js';
+// import EcroTestLib from './EcroTestLib.js';
 import EthereumLib from './EthereumLib';
 import EthereumTestLib from './EthereumTestLib';
 import BitcoinLib from './BitcoinLib';
@@ -24,7 +24,7 @@ import GenerateAddressAndPrivkey from '../core/ianColeman/mnemonicToWallets/Gene
 import Networks from '../core/ianColeman/networks.js';
 import HttpService from '../core/services/HttpService.js';
 import ExchangeRates from '../core/services/ExchangeRates.js';
-import blockchain from "./edc/blockchain";
+// import blockchain from "./edc/blockchain";
 import CryptoJS from 'crypto-js';
 import moment from 'moment';
 import cryptoRandomString from 'crypto-random-string';
@@ -40,8 +40,8 @@ export default class WalletInterface {
         this.protocols = {};
         this.atomicSwaps = {};
         if(process.env.ENVIRONMENT_BG === "production"){
-            this.protocols.edc = new EdcLib(this, blockchain)
-            this.protocols.ecro = new EcroLib(this)
+            // this.protocols.edc = new EdcLib(this, blockchain)
+            // this.protocols.ecro = new EcroLib(this)
             this.protocols.btc = new BitcoinLib(this);
             this.protocols.btc49 = new BitcoinLibBip49(this);
             this.protocols.bch = new BitcoinCashLib(this);
@@ -50,8 +50,8 @@ export default class WalletInterface {
             this.protocols.dash = new DashLib(this);
             this.atomicSwaps.eth = new AtomicSwapEth(this);
         }else if(process.env.ENVIRONMENT_BG === "development"){
-            this.protocols.edctest = new EdcTestLib(this, blockchain)
-            this.protocols.ecrotest = new EcroTestLib(this)
+            // this.protocols.edctest = new EdcTestLib(this, blockchain)
+            // this.protocols.ecrotest = new EcroTestLib(this)
             this.protocols.btctest = new BitcoinTestLib(this);
             this.protocols.btc49test = new BitcoinTestLibBip49(this);
             this.protocols.bchtest = new BitcoinCashTestLib(this);        
@@ -62,7 +62,7 @@ export default class WalletInterface {
         }
         this.mnemonic = new Mnemonic();
         this.randomizer = new Randomizer(0, 255);
-        console.log(`Ecro wallet is working in ${process.env.ENVIRONMENT_BG}`);
+        console.log(`Atomic wallet is working in ${process.env.ENVIRONMENT_BG}`);
     }
 
     createOrder(data){
@@ -95,6 +95,7 @@ export default class WalletInterface {
             let status = result[0].status;
             console.log(status)
             if(status == "INPROCESS"){
+                // проверка конферма транзакции
                 status = "ORDERCREATEDINSC";
                 url = `http://localhost:8600/order/${result[0]._id}/status/${status}`;
                 await this.httpService.putRequest(url).then(response=>response.json());
@@ -122,6 +123,10 @@ export default class WalletInterface {
             let status = "INPROCESS"
             url = `http://localhost:8600/order/${data.idOrder}/status/${status}`;
             let result = await this.httpService.putRequest(url).then(response=>response.json());
+            // создание биткоин скрипта
+            // отправка продавцом buyAmount на адрес биткоин скрипта
+            // сохранение хеша в БД
+            // сохранение скрипт адреса в БД
             console.log("result in replyToOrder", result)
             this.monitoringAtReplying(data.idOrder)
             return result;
