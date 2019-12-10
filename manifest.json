@@ -1,0 +1,31 @@
+{
+  "manifest_version": 2,
+  "name": "Crypto Atomic Wallet",
+  "short_name": "AtomicWallet",
+  "description": "Test version multi-cryptocurrency atomic wallet",
+  "version": "0.1.0",
+  "default_locale": "en",
+  "icons": {
+    "128": "img/iconWallet.png"
+  },
+  "browser_action": {
+    "default_icon": "img/iconWallet.png",
+    "default_title": "AtomicWallet",
+    "default_popup": "page/popup.html"
+  },
+  "background": {
+    "scripts": [
+      "build/background.js"
+    ]
+  },
+  "permissions": [
+    "tabs",
+    "webRequest",
+    "webRequestBlocking",
+    "activeTab",
+    "storage"
+  ],
+  "web_accessible_resources": [
+    "img/*.png"
+  ]
+}
