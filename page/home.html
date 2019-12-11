@@ -73,17 +73,13 @@
         <h4>Select cryptocurrency</h4>
         <select id="wallet-interface">
             <!-- mainnet networks -->
-            <!-- <option value="edc">EDC Blockchain</option>
-            <option value="ecrotest">Ecro</option>
-            <option value="btc">Bitcoin</option>
+            <!-- <option value="btc">Bitcoin</option>
             <option value="btc49">Bitcoin BIP49</option>
             <option value="eth">Ethereum</option>
             <option value="ltc">Litecoin</option>
             <option value="bch">Bitcoin Cash</option>
             <option value="dash">Dash</option> -->
             <!-- testnet networks -->
-            <!-- <option value="edctest">EDC Blockchain Testnet</option>
-            <option value="ecrotest">Ecro Testnet</option> -->
             <option value="btctest">Bitcoin Testnet</option>
             <!-- <option value="btc49test">Bitcoin Testnet BIP49</option> -->
             <option value="ethtest">Ethereum Testnet</option>
@@ -138,10 +134,7 @@
         <h4>Send Transaction</h4>
         <input id="receiver" type="text" placeholder="Receiver"/>
         <input id="value" type="text" placeholder="Value"/>
-        <!-- <p>Рекомендуемая цена газа:</p>
-        <p id="gaspriseadvise"></p> -->
         <input id="gasprise" type="text" placeholder="Gas prise"/>
-        <input id="memo" type="text" placeholder="Memo"/>
         <button id="send">SEND</button>
         <p>TxHash:</p>
         <p id="txhash"></p>
@@ -155,14 +148,6 @@
     <p></p>
     <hr></hr>
     <div>
-        <h4>Create EDC account</h4>
-        <input id="account-name" type="text" placeholder="Account name"/>
-        <button id="create-account">Create account</button>
-        <p id="edc-create-done"></p>
-        <p id="edc-brainkey"></p>
-    </div>
-    <hr></hr>
-    <div>
         <h4>Import mnemonic</h4>
         <p>If you already have an account you can import your mnemonic:</p>
         <input id="import-your-mnemonic" type="text" placeholder="Mnemonic"/>
@@ -173,20 +158,6 @@
         <h4>Export mnemonic</h4>
         <p>Please enter your password</p>
         <button id="export-mnemonic">Export mnemonic</button>
-    </div>
-    <p></p>
-    <hr></hr>
-    <div>
-        <h4>Import brainkey</h4>
-        <p>If you already have an account you can import your brainkey:</p>
-        <input id="import-your-brainkey" type="text" placeholder="Brainkey"/>
-        <button id="import-brainkey">Import brainkey</button>
-    </div>
-    <hr></hr>
-    <div>
-        <h4>Export brainkey</h4>
-        <p>Please enter your password</p>
-        <button id="export-brainkey">Export brainkey</button>
     </div>
 </body>
 </html>

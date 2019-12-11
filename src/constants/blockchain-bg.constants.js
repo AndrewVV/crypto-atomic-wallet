@@ -17,17 +17,6 @@ const LTCTEST = 'LTCTEST';
 const DASH = 'DASH';
 const DASHTEST = 'DASHTEST';
 
-const EDC = 'EDC';
-const EDCTEST = 'EDCTEST';
-const EDC_ID = '1.3.1';
-const ACCOUNT_CREATED = 'ACCOUNT_CREATED';
-const ACCOUNT_EXIST = 'ACCOUNT_EXIST';
-const MANY_ATTEMPTS = 'MANY_ATTEMPTS';
-
-const ECRO = 'ECRO';
-const ECROTEST = 'ECROTEST';
-const ECRO_ID = '1.3.52';
-
 export {
     BTC,
     BTCTEST,
@@ -43,15 +32,6 @@ export {
     LTCTEST,
     DASH,
     DASHTEST,
-    EDC,
-    EDCTEST,
-    EDC_ID,
-    ACCOUNT_CREATED,
-    ACCOUNT_EXIST,
-    MANY_ATTEMPTS,
-    ECRO,
-    ECROTEST,
-    ECRO_ID,
 };
 
 
@@ -74,11 +54,6 @@ const LTCTESTAPIPROVIDER = 'https://sochain.com/api/v2/';
 
 const DASHAPIPROVIDER = 'https://api.blockcypher.com/v1/dash/main/';
 
-const EDC_NODE = "wss://node.blockchain.mn";
-const EDC_REGISTER_URL = 'https://info.blockchain.mn/registration'
-const EDCTEST_NODE = "wss://testnet-node.blockchain.mn";
-const EDCTEST_REGISTER_URL = 'https://testnet-info.blockchain.mn/registration';
-
 export {
     BTCAPIPROVIDER,
     APITOKENPROD,
@@ -94,10 +69,6 @@ export {
     LTCAPIPROVIDER,
     LTCTESTAPIPROVIDER,
     DASHAPIPROVIDER,
-    EDC_NODE,
-    EDC_REGISTER_URL,
-    EDCTEST_NODE,
-    EDCTEST_REGISTER_URL,
 };
 
 const RATEUAHUSD = 24;

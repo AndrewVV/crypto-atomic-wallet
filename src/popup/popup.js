@@ -101,24 +101,6 @@ $(document).ready(function() {
   					resolve(response)
 				});					
             })
-            let ciphertextEDC = await new Promise((resolve,reject) => {
-    			chrome.storage.local.get(['ciphertextEdc'], response => {
-    				resolve(response)
-    			});            	
-            })
-            if(Object.keys(ciphertextEDC).length > 0){
-                data = {"password": password, "ciphertext": ciphertextEDC.ciphertextEdc}
-                let brainKey = await new Promise((resolve, reject) => {
-                    chrome.runtime.sendMessage({"action": (Actions.getBackground().getBrainKey), "data": data}, response => {
-                        resolve(response)
-                    });					
-                })
-                let accountName = await new Promise((resolve, reject) => {
-                    chrome.runtime.sendMessage({"action": (Actions.getBackground().getNameBrainKey), "data": brainKey}, response => {
-                        resolve(response)
-                    });					
-                })       
-            }
             if(!mnemonic){
             	alert('Wrong password')
             }else{
@@ -130,34 +112,19 @@ $(document).ready(function() {
     $("#showaddress").click(async()=> {
         let ticker = document.getElementById("wallet-interface").value;
         ticker = ticker.toUpperCase();
-        let result;
-        if(ticker == "EDC" || ticker == "EDCTEST" || ticker == "ECRO" || ticker == "ECROTEST"){
-            let name = await new Promise((resolve,reject) => {
-                chrome.storage.local.get(['nameEdc'], response => {
-                    resolve(response)
-                });            	
-            })
-            result = name.nameEdc;
-        }else{
-            let data = {"ticker": ticker}
-            result = await new Promise((resolve, reject) => {
-                    chrome.runtime.sendMessage({"action": (Actions.getBackground().getAddress), "data": data}, response => {
-                        resolve(response)
-                    });                 
-            })
-        }
+        let data = {"ticker": ticker}
+        let result = await new Promise((resolve, reject) => {
+            chrome.runtime.sendMessage({"action": (Actions.getBackground().getAddress), "data": data}, response => {
+                resolve(response)
+            });                 
+        })
         console.log("Show address: ",result)
         $('#address').html(result);
     });
 
     $("#get-balance").click(async()=> {
-        let name = await new Promise((resolve,reject) => {
-            chrome.storage.local.get(['nameEdc'], response => {
-                resolve(response)
-            });            	
-        })
         let result = await new Promise((resolve, reject) => {
-            chrome.runtime.sendMessage({"action": (Actions.getBackground().getBalance), "data": name.nameEdc}, response => {
+            chrome.runtime.sendMessage({"action": (Actions.getBackground().getBalance)}, response => {
                     resolve(response)
             });                 
         })
@@ -202,13 +169,7 @@ $(document).ready(function() {
         let to = document.getElementById('receiver').value;
         let value = document.getElementById('value').value;
         let gasPrice = document.getElementById('gasprise').value;
-        let memo = document.getElementById('memo').value;
-        let name = await new Promise((resolve,reject) => {
-            chrome.storage.local.get(['nameEdc'], response => {
-                resolve(response)
-            });            	
-        })
-        let data = {"to": to, "value": value, "gasPrice": gasPrice, "memo": memo, "from": name.nameEdc};
+        let data = {"to": to, "value": value, "gasPrice": gasPrice};
         let result = await new Promise((resolve, reject) => {
                 chrome.runtime.sendMessage({"action": (Actions.getBackground().sendTransaction), "data": data}, response => {
                     resolve(response)
@@ -240,44 +201,15 @@ $(document).ready(function() {
             }else{
                 let ticker = document.getElementById("wallet-interface").value;
                 ticker = ticker.toUpperCase();
-                let result;
-                if(ticker == "EDC" || ticker == "EDCTEST"){
-                    alert("Please choose another cryptocurrency")
-                }else{
-                    let data = {"ticker": ticker}
-                    result = await new Promise((resolve, reject) => {
-                            chrome.runtime.sendMessage({"action": (Actions.getBackground().getExportPrivKey), "data": data}, response => {
-                                resolve(response)
-                            });                 
-                    })
-                    alert("Please save your private key: "+result)
-                }
+                let data = {"ticker": ticker}
+                let result = await new Promise((resolve, reject) => {
+                    chrome.runtime.sendMessage({"action": (Actions.getBackground().getExportPrivKey), "data": data}, response => {
+                        resolve(response)
+                    });                 
+                })
+                alert("Please save your private key: "+result)
             }
         }
-    });
-
-    $("#create-account").click(async ()=> {
-        let password = document.getElementById('password').value;
-        let accountName = document.getElementById('account-name').value;
-        let result = await new Promise((resolve, reject) => {
-                chrome.runtime.sendMessage({"action": (Actions.getBackground().createAccount), "data": accountName}, response => {
-                    resolve(response)
-                });                 
-        })		
-        let data = {"password": password, "brainKey": result.phrase}
-		let ciphertext = await new Promise((resolve, reject) => {
-			chrome.runtime.sendMessage({"action": (Actions.getBackground().getCiphertextEdc), "data": data}, response => {
-  				resolve(response)
-			});					
-		})
-		chrome.storage.local.set({'ciphertextEdc': ciphertext}, function() {
-      		console.log('Ciphertext EDC saved');
-    	});
-        chrome.storage.local.set({'nameEdc': accountName}, function() {
-            console.log('Account name saved');
-        });
-        $('#edc-create-done').html(result.result);
-        $('#edc-brainkey').html(result.phrase);
     });
 
     $("#import-mnemonic").click(async()=> {
@@ -316,54 +248,6 @@ $(document).ready(function() {
                 alert('Wrong password')
             }else{
                 alert(mnemonic)
-            }
-        }
-    });
-
-    $("#import-brainkey").click(async()=> {
-        console.log('Import Brainkey')
-        let password = document.getElementById('password').value;
-        let brainkey = document.getElementById('import-your-brainkey').value;
-        let data = {"password": password, "brainKey": brainkey}
-		let ciphertext = await new Promise((resolve, reject) => {
-			chrome.runtime.sendMessage({"action": (Actions.getBackground().getCiphertextEdc), "data": data}, response => {
-  				resolve(response)
-			});					
-		})
-		chrome.storage.local.set({'ciphertextEdc': ciphertext}, function() {
-            console.log('Ciphertext EDC saved');
-        });
-        let accountName = await new Promise((resolve, reject) => {
-			chrome.runtime.sendMessage({"action": (Actions.getBackground().getNameBrainKey), "data": brainkey}, response => {
-  				resolve(response)
-			});					
-        })
-        chrome.storage.local.set({'nameEdc': accountName}, function() {
-            console.log('Account name saved');
-        });       
-    });
-
-    $("#export-brainkey").click(async()=> {
-        console.log('Export Brainkey')
-        let password = document.getElementById('password').value;
-        if(!password){
-            alert('Enter your password')
-        }else{
-            let ciphertextEdc = await new Promise((resolve,reject) => {
-                chrome.storage.local.get(['ciphertextEdc'], response => {
-                    resolve(response)
-                });            	
-            })
-            let data = {"password": password, "ciphertext": ciphertextEdc.ciphertextEdc}
-            let brainKey = await new Promise((resolve, reject) => {
-                chrome.runtime.sendMessage({"action": (Actions.getBackground().getBrainKey), "data": data}, response => {
-                      resolve(response)
-                });					
-            })
-            if(!brainKey){
-                alert('Wrong password')
-            }else{
-                alert(brainKey)
             }
         }
     });

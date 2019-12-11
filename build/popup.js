@@ -20894,10 +20894,6 @@ function () {
         getExportPrivKey: 'getExportPrivKey',
         getBalance: 'getBalance',
         sendTransaction: 'sendTransaction',
-        createAccount: 'createAccount',
-        getCiphertextEdc: 'getCiphertextEdc',
-        getBrainKey: 'getBrainKey',
-        getNameBrainKey: 'getNameBrainKey',
         getTxHistory: 'getTxHistory',
         getCurrentRate: 'getCurrentRate',
         validateAddress: 'validateAddress',
@@ -21116,7 +21112,7 @@ $(document).ready(function () {
     });
   });
   $("#open-wallet").on("click", function _callee6() {
-    var password, ciphertext, data, mnemonic, ciphertextEDC, brainKey, accountName;
+    var password, ciphertext, data, mnemonic;
     return regeneratorRuntime.async(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
@@ -21129,7 +21125,7 @@ $(document).ready(function () {
             }
 
             alert('Enter your password');
-            _context6.next = 24;
+            _context6.next = 13;
             break;
 
           case 5:
@@ -21158,58 +21154,14 @@ $(document).ready(function () {
 
           case 11:
             mnemonic = _context6.sent;
-            _context6.next = 14;
-            return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
-              chrome.storage.local.get(['ciphertextEdc'], function (response) {
-                resolve(response);
-              });
-            }));
 
-          case 14:
-            ciphertextEDC = _context6.sent;
-
-            if (!(Object.keys(ciphertextEDC).length > 0)) {
-              _context6.next = 23;
-              break;
-            }
-
-            data = {
-              "password": password,
-              "ciphertext": ciphertextEDC.ciphertextEdc
-            };
-            _context6.next = 19;
-            return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
-              chrome.runtime.sendMessage({
-                "action": Actions.getBackground().getBrainKey,
-                "data": data
-              }, function (response) {
-                resolve(response);
-              });
-            }));
-
-          case 19:
-            brainKey = _context6.sent;
-            _context6.next = 22;
-            return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
-              chrome.runtime.sendMessage({
-                "action": Actions.getBackground().getNameBrainKey,
-                "data": brainKey
-              }, function (response) {
-                resolve(response);
-              });
-            }));
-
-          case 22:
-            accountName = _context6.sent;
-
-          case 23:
             if (!mnemonic) {
               alert('Wrong password');
             } else {
               $('#open-wallet-done').html('Wallet is open');
             }
 
-          case 24:
+          case 13:
           case "end":
             return _context6.stop();
         }
@@ -21217,37 +21169,17 @@ $(document).ready(function () {
     });
   });
   $("#showaddress").click(function _callee7() {
-    var ticker, result, name, data;
+    var ticker, data, result;
     return regeneratorRuntime.async(function _callee7$(_context7) {
       while (1) {
         switch (_context7.prev = _context7.next) {
           case 0:
             ticker = document.getElementById("wallet-interface").value;
             ticker = ticker.toUpperCase();
-
-            if (!(ticker == "EDC" || ticker == "EDCTEST" || ticker == "ECRO" || ticker == "ECROTEST")) {
-              _context7.next = 9;
-              break;
-            }
-
-            _context7.next = 5;
-            return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
-              chrome.storage.local.get(['nameEdc'], function (response) {
-                resolve(response);
-              });
-            }));
-
-          case 5:
-            name = _context7.sent;
-            result = name.nameEdc;
-            _context7.next = 13;
-            break;
-
-          case 9:
             data = {
               "ticker": ticker
             };
-            _context7.next = 12;
+            _context7.next = 5;
             return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
               chrome.runtime.sendMessage({
                 "action": Actions.getBackground().getAddress,
@@ -21257,14 +21189,12 @@ $(document).ready(function () {
               });
             }));
 
-          case 12:
+          case 5:
             result = _context7.sent;
-
-          case 13:
             console.log("Show address: ", result);
             $('#address').html(result);
 
-          case 15:
+          case 8:
           case "end":
             return _context7.stop();
         }
@@ -21272,36 +21202,26 @@ $(document).ready(function () {
     });
   });
   $("#get-balance").click(function _callee8() {
-    var name, result;
+    var result;
     return regeneratorRuntime.async(function _callee8$(_context8) {
       while (1) {
         switch (_context8.prev = _context8.next) {
           case 0:
             _context8.next = 2;
             return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
-              chrome.storage.local.get(['nameEdc'], function (response) {
-                resolve(response);
-              });
-            }));
-
-          case 2:
-            name = _context8.sent;
-            _context8.next = 5;
-            return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
               chrome.runtime.sendMessage({
-                "action": Actions.getBackground().getBalance,
-                "data": name.nameEdc
+                "action": Actions.getBackground().getBalance
               }, function (response) {
                 resolve(response);
               });
             }));
 
-          case 5:
+          case 2:
             result = _context8.sent;
             console.log("Balance: ", result);
             $('#balance').html(result);
 
-          case 8:
+          case 5:
           case "end":
             return _context8.stop();
         }
@@ -21396,7 +21316,7 @@ $(document).ready(function () {
     });
   });
   $("#send").click(function _callee12() {
-    var to, value, gasPrice, memo, name, data, result;
+    var to, value, gasPrice, data, result;
     return regeneratorRuntime.async(function _callee12$(_context12) {
       while (1) {
         switch (_context12.prev = _context12.next) {
@@ -21404,24 +21324,12 @@ $(document).ready(function () {
             to = document.getElementById('receiver').value;
             value = document.getElementById('value').value;
             gasPrice = document.getElementById('gasprise').value;
-            memo = document.getElementById('memo').value;
-            _context12.next = 6;
-            return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
-              chrome.storage.local.get(['nameEdc'], function (response) {
-                resolve(response);
-              });
-            }));
-
-          case 6:
-            name = _context12.sent;
             data = {
               "to": to,
               "value": value,
-              "gasPrice": gasPrice,
-              "memo": memo,
-              "from": name.nameEdc
+              "gasPrice": gasPrice
             };
-            _context12.next = 10;
+            _context12.next = 6;
             return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
               chrome.runtime.sendMessage({
                 "action": Actions.getBackground().sendTransaction,
@@ -21431,12 +21339,12 @@ $(document).ready(function () {
               });
             }));
 
-          case 10:
+          case 6:
             result = _context12.sent;
             console.log(result);
             $('#txhash').html(result);
 
-          case 13:
+          case 9:
           case "end":
             return _context12.stop();
         }
@@ -21444,7 +21352,7 @@ $(document).ready(function () {
     });
   });
   $("#export-privkey").click(function _callee13() {
-    var password, ciphertext, data, mnemonic, _ticker, result, _data;
+    var password, ciphertext, data, mnemonic, _ticker, _data, result;
 
     return regeneratorRuntime.async(function _callee13$(_context13) {
       while (1) {
@@ -21459,7 +21367,7 @@ $(document).ready(function () {
             }
 
             alert('Enter your password');
-            _context13.next = 28;
+            _context13.next = 24;
             break;
 
           case 6:
@@ -21495,27 +21403,16 @@ $(document).ready(function () {
             }
 
             alert('Wrong password');
-            _context13.next = 28;
+            _context13.next = 24;
             break;
 
           case 17:
             _ticker = document.getElementById("wallet-interface").value;
             _ticker = _ticker.toUpperCase();
-
-            if (!(_ticker == "EDC" || _ticker == "EDCTEST")) {
-              _context13.next = 23;
-              break;
-            }
-
-            alert("Please choose another cryptocurrency");
-            _context13.next = 28;
-            break;
-
-          case 23:
             _data = {
               "ticker": _ticker
             };
-            _context13.next = 26;
+            _context13.next = 22;
             return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
               chrome.runtime.sendMessage({
                 "action": Actions.getBackground().getExportPrivKey,
@@ -21525,78 +21422,22 @@ $(document).ready(function () {
               });
             }));
 
-          case 26:
+          case 22:
             result = _context13.sent;
             alert("Please save your private key: " + result);
 
-          case 28:
+          case 24:
           case "end":
             return _context13.stop();
         }
       }
     });
   });
-  $("#create-account").click(function _callee14() {
-    var password, accountName, result, data, ciphertext;
+  $("#import-mnemonic").click(function _callee14() {
+    var password, mnemonic, data, ciphertext;
     return regeneratorRuntime.async(function _callee14$(_context14) {
       while (1) {
         switch (_context14.prev = _context14.next) {
-          case 0:
-            password = document.getElementById('password').value;
-            accountName = document.getElementById('account-name').value;
-            _context14.next = 4;
-            return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
-              chrome.runtime.sendMessage({
-                "action": Actions.getBackground().createAccount,
-                "data": accountName
-              }, function (response) {
-                resolve(response);
-              });
-            }));
-
-          case 4:
-            result = _context14.sent;
-            data = {
-              "password": password,
-              "brainKey": result.phrase
-            };
-            _context14.next = 8;
-            return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
-              chrome.runtime.sendMessage({
-                "action": Actions.getBackground().getCiphertextEdc,
-                "data": data
-              }, function (response) {
-                resolve(response);
-              });
-            }));
-
-          case 8:
-            ciphertext = _context14.sent;
-            chrome.storage.local.set({
-              'ciphertextEdc': ciphertext
-            }, function () {
-              console.log('Ciphertext EDC saved');
-            });
-            chrome.storage.local.set({
-              'nameEdc': accountName
-            }, function () {
-              console.log('Account name saved');
-            });
-            $('#edc-create-done').html(result.result);
-            $('#edc-brainkey').html(result.phrase);
-
-          case 13:
-          case "end":
-            return _context14.stop();
-        }
-      }
-    });
-  });
-  $("#import-mnemonic").click(function _callee15() {
-    var password, mnemonic, data, ciphertext;
-    return regeneratorRuntime.async(function _callee15$(_context15) {
-      while (1) {
-        switch (_context15.prev = _context15.next) {
           case 0:
             console.log('Import Mnemonic');
             password = document.getElementById('password').value;
@@ -21605,7 +21446,7 @@ $(document).ready(function () {
               "password": password,
               "mnemonic": mnemonic
             };
-            _context15.next = 6;
+            _context14.next = 6;
             return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
               chrome.runtime.sendMessage({
                 "action": Actions.getBackground().getCiphertext,
@@ -21616,7 +21457,7 @@ $(document).ready(function () {
             }));
 
           case 6:
-            ciphertext = _context15.sent;
+            ciphertext = _context14.sent;
             chrome.storage.local.set({
               'ciphertext': ciphertext
             }, function () {
@@ -21625,31 +21466,31 @@ $(document).ready(function () {
 
           case 8:
           case "end":
-            return _context15.stop();
+            return _context14.stop();
         }
       }
     });
   });
-  $("#export-mnemonic").click(function _callee16() {
+  $("#export-mnemonic").click(function _callee15() {
     var password, ciphertext, data, mnemonic;
-    return regeneratorRuntime.async(function _callee16$(_context16) {
+    return regeneratorRuntime.async(function _callee15$(_context15) {
       while (1) {
-        switch (_context16.prev = _context16.next) {
+        switch (_context15.prev = _context15.next) {
           case 0:
             console.log('Export Mnemonic');
             password = document.getElementById('password').value;
 
             if (password) {
-              _context16.next = 6;
+              _context15.next = 6;
               break;
             }
 
             alert('Enter your password');
-            _context16.next = 14;
+            _context15.next = 14;
             break;
 
           case 6:
-            _context16.next = 8;
+            _context15.next = 8;
             return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
               chrome.storage.local.get(['ciphertext'], function (response) {
                 resolve(response);
@@ -21657,12 +21498,12 @@ $(document).ready(function () {
             }));
 
           case 8:
-            ciphertext = _context16.sent;
+            ciphertext = _context15.sent;
             data = {
               "password": password,
               "ciphertext": ciphertext.ciphertext
             };
-            _context16.next = 12;
+            _context15.next = 12;
             return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
               chrome.runtime.sendMessage({
                 "action": Actions.getBackground().getExportMnemonic,
@@ -21673,7 +21514,7 @@ $(document).ready(function () {
             }));
 
           case 12:
-            mnemonic = _context16.sent;
+            mnemonic = _context15.sent;
 
             if (!mnemonic) {
               alert('Wrong password');
@@ -21683,120 +21524,7 @@ $(document).ready(function () {
 
           case 14:
           case "end":
-            return _context16.stop();
-        }
-      }
-    });
-  });
-  $("#import-brainkey").click(function _callee17() {
-    var password, brainkey, data, ciphertext, accountName;
-    return regeneratorRuntime.async(function _callee17$(_context17) {
-      while (1) {
-        switch (_context17.prev = _context17.next) {
-          case 0:
-            console.log('Import Brainkey');
-            password = document.getElementById('password').value;
-            brainkey = document.getElementById('import-your-brainkey').value;
-            data = {
-              "password": password,
-              "brainKey": brainkey
-            };
-            _context17.next = 6;
-            return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
-              chrome.runtime.sendMessage({
-                "action": Actions.getBackground().getCiphertextEdc,
-                "data": data
-              }, function (response) {
-                resolve(response);
-              });
-            }));
-
-          case 6:
-            ciphertext = _context17.sent;
-            chrome.storage.local.set({
-              'ciphertextEdc': ciphertext
-            }, function () {
-              console.log('Ciphertext EDC saved');
-            });
-            _context17.next = 10;
-            return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
-              chrome.runtime.sendMessage({
-                "action": Actions.getBackground().getNameBrainKey,
-                "data": brainkey
-              }, function (response) {
-                resolve(response);
-              });
-            }));
-
-          case 10:
-            accountName = _context17.sent;
-            chrome.storage.local.set({
-              'nameEdc': accountName
-            }, function () {
-              console.log('Account name saved');
-            });
-
-          case 12:
-          case "end":
-            return _context17.stop();
-        }
-      }
-    });
-  });
-  $("#export-brainkey").click(function _callee18() {
-    var password, ciphertextEdc, data, brainKey;
-    return regeneratorRuntime.async(function _callee18$(_context18) {
-      while (1) {
-        switch (_context18.prev = _context18.next) {
-          case 0:
-            console.log('Export Brainkey');
-            password = document.getElementById('password').value;
-
-            if (password) {
-              _context18.next = 6;
-              break;
-            }
-
-            alert('Enter your password');
-            _context18.next = 14;
-            break;
-
-          case 6:
-            _context18.next = 8;
-            return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
-              chrome.storage.local.get(['ciphertextEdc'], function (response) {
-                resolve(response);
-              });
-            }));
-
-          case 8:
-            ciphertextEdc = _context18.sent;
-            data = {
-              "password": password,
-              "ciphertext": ciphertextEdc.ciphertextEdc
-            };
-            _context18.next = 12;
-            return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
-              chrome.runtime.sendMessage({
-                "action": Actions.getBackground().getBrainKey,
-                "data": data
-              }, function (response) {
-                resolve(response);
-              });
-            }));
-
-          case 12:
-            brainKey = _context18.sent;
-
-            if (!brainKey) {
-              alert('Wrong password');
-            } else {
-              alert(brainKey);
-            }
-
-          case 14:
-          case "end":
-            return _context18.stop();
+            return _context15.stop();
         }
       }
     });

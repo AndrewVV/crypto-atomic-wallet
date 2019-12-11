@@ -2,8 +2,6 @@ import btc from '../components/assets/images/coins/btc.svg';
 import dsh from '../components/assets/images/coins/dsh.svg';
 import eth from '../components/assets/images/coins/eth.svg';
 import ltc from '../components/assets/images/coins/ltc.svg';
-import ecr from '../components/assets/images/coins/ecr.svg';
-import edc from '../components/assets/images/coins/edc.svg';
 import btcCash from '../components/assets/images/coins/btcCash.svg';
 
 import { PRODUCTION } from '.';
@@ -39,18 +37,6 @@ const tickersPROD = [
         img: dsh,
         explorer: 'https://live.blockcypher.com/dash/address/',
     },
-    {
-        value: 'EDC',
-        name: 'EDC Blockchain',
-        img: edc,
-        explorer: 'https://explorer.blockchain.mn/account/',
-    },
-    {
-        value: 'ECRO',
-        name: 'Ecro',
-        img: ecr,
-        explorer: 'https://explorer.blockchain.mn/account/',
-    },
 ];
 
 const tickersDEV = [
@@ -83,18 +69,6 @@ const tickersDEV = [
         name: 'Dash TEST',
         img: dsh,
         explorer: 'https://chain.so/address/DASHTEST/',
-    },
-    {
-        value: 'EDCTEST',
-        name: 'EDC Blockchain TEST',
-        img: edc,
-        explorer: 'https://testnet-explorer.blockchain.mn/account/',
-    },
-    {
-        value: 'ECROTEST',
-        name: 'Ecro TEST',
-        img: ecr,
-        explorer: 'https://testnet-explorer.blockchain.mn/account/',
     },
 ];
 

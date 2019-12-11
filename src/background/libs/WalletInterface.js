@@ -1,7 +1,3 @@
-// import EdcLib from './EdcLib.js';
-// import EcroLib from './EcroLib.js';
-// import EdcTestLib from './EdcTestLib.js';
-// import EcroTestLib from './EcroTestLib.js';
 import EthereumLib from './EthereumLib';
 import EthereumTestLib from './EthereumTestLib';
 import BitcoinLib from './BitcoinLib';
@@ -24,7 +20,6 @@ import GenerateAddressAndPrivkey from '../core/ianColeman/mnemonicToWallets/Gene
 import Networks from '../core/ianColeman/networks.js';
 import HttpService from '../core/services/HttpService.js';
 import ExchangeRates from '../core/services/ExchangeRates.js';
-// import blockchain from "./edc/blockchain";
 import CryptoJS from 'crypto-js';
 import moment from 'moment';
 import cryptoRandomString from 'crypto-random-string';
@@ -40,8 +35,6 @@ export default class WalletInterface {
         this.protocols = {};
         this.atomicSwaps = {};
         if(process.env.ENVIRONMENT_BG === "production"){
-            // this.protocols.edc = new EdcLib(this, blockchain)
-            // this.protocols.ecro = new EcroLib(this)
             this.protocols.btc = new BitcoinLib(this);
             this.protocols.btc49 = new BitcoinLibBip49(this);
             this.protocols.bch = new BitcoinCashLib(this);
@@ -50,8 +43,6 @@ export default class WalletInterface {
             this.protocols.dash = new DashLib(this);
             this.atomicSwaps.eth = new AtomicSwapEth(this);
         }else if(process.env.ENVIRONMENT_BG === "development"){
-            // this.protocols.edctest = new EdcTestLib(this, blockchain)
-            // this.protocols.ecrotest = new EcroTestLib(this)
             this.protocols.btctest = new BitcoinTestLib(this);
             this.protocols.btc49test = new BitcoinTestLibBip49(this);
             this.protocols.bchtest = new BitcoinCashTestLib(this);        
@@ -190,7 +181,7 @@ export default class WalletInterface {
                     let plaintext = bytes.toString(CryptoJS.enc.Utf8);
                     return resolve(plaintext);
                 }catch(e){
-                    return resolve('Wrong password')
+                    return resolve(null)
                 }            
             }catch(e){
                 return reject(e);
@@ -279,54 +270,11 @@ export default class WalletInterface {
         })
     }
 
-    sendTransaction(to,value,gasPrice,memo,from){
+    sendTransaction(to,value,gasPrice){
         return new Promise(async(resolve,reject)=>{
             try{
-                let txHash = await this.protocol.sendTransaction(to,value,gasPrice,memo,from)
+                let txHash = await this.protocol.sendTransaction(to,value,gasPrice)
                 return resolve(txHash);
-            }catch (e) {
-                return reject(e);
-            }
-        })
-    }
-
-    createAccount(nameAccount){
-        return new Promise(async(resolve,reject)=>{
-            try{
-                let result = await this.protocol.createAccount(nameAccount)
-                return resolve(result);
-            }catch (e) {
-                return reject(e);
-            }
-        })
-    }
-
-    seedToKey(seed){
-        return new Promise(async(resolve,reject)=>{
-            try{
-                if(this.protocols.edc){
-                    let result = await this.protocols.edc.seedToKey(seed);
-                    return resolve(result);
-                }else if(this.protocols.edctest){
-                    let result = await this.protocols.edctest.seedToKey(seed);
-                    return resolve(result);
-                }
-            }catch (e) {
-                return reject(e);
-            }
-        })
-    }
-
-    brainKeyToNameAccount(brainKey){
-        return new Promise(async(resolve,reject)=>{
-            try{
-                if(this.protocols.edc){
-                    let result = await this.protocols.edc.brainKeyToNameAccount(brainKey);
-                    return resolve(result);
-                }else if(this.protocols.edctest){
-                    let result = await this.protocols.edctest.brainKeyToNameAccount(brainKey);
-                    return resolve(result);
-                }
             }catch (e) {
                 return reject(e);
             }
@@ -348,7 +296,6 @@ export default class WalletInterface {
 
     async getFee(){
         let result = await this.protocol.getFee()
-        console.log(result);
         return result;
     }
 

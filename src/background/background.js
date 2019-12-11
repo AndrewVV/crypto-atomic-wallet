@@ -44,25 +44,8 @@ chrome.runtime.onMessage.addListener(
                     sendResponse(balance);
                     break;
                 case (Actions.getBackground().sendTransaction):
-                    let txHash = await walletInterface.sendTransaction(request.data.to, request.data.value, request.data.gasPrice, request.data.memo, request.data.from);
+                    let txHash = await walletInterface.sendTransaction(request.data.to, request.data.value, request.data.gasPrice);
                     sendResponse(txHash);
-					break;
-				case (Actions.getBackground().createAccount):
-					let newAccount = await walletInterface.createAccount(request.data);
-					sendResponse(newAccount);
-					break;
-				case (Actions.getBackground().getCiphertextEdc):
-					let ciphertextEdc = await walletInterface.encryptMnemonic(request.data.brainKey,request.data.password)
-					walletInterface.seedToKey(request.data.brainKey)
-					sendResponse(ciphertextEdc)
-					break;
-				case (Actions.getBackground().getBrainKey):
-					let brainKey = await walletInterface.decryptMnemonic(request.data.ciphertext,request.data.password);
-					sendResponse(brainKey);
-					break;
-				case (Actions.getBackground().getNameBrainKey):
-					let nameBrainKey = await walletInterface.brainKeyToNameAccount(request.data);
-					sendResponse(nameBrainKey);
 					break;
 				case (Actions.getBackground().getTxHistory):
 					let txHistory = await walletInterface.getTxHistory();
