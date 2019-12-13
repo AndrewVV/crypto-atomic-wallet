@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import WalletInterface from './libs/WalletInterface';
 import ActionsClass from '../common/class.actions.js';
 let walletInterface = new WalletInterface();

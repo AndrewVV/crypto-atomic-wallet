@@ -1,5 +1,4 @@
 import Web3 from 'web3';
-import abi from 'ethereumjs-abi';
 import EthereumTx  from 'ethereumjs-tx';
 import validator from 'ethereum-address';
 import NonceService from '../core/services/NonceService';
@@ -18,8 +17,6 @@ import {
     SEND,
     SELF,
 } from '../../constants';
-let bytes32;
-const etalonBytes32 = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
 export default class EthereumTestLibClass{
     constructor(wallet){
@@ -29,52 +26,6 @@ export default class EthereumTestLibClass{
         this.validator = wallet.validator;
         this.nonceService = new NonceService(this.web3,this.validator,this.logger);
         this.httpService = wallet.httpService;
-    }
-
-    async createOrder(data){
-        let url = "http://localhost:8600/create/order";
-        data["addressToReceive"] = await this.generateAddAndPriv.generateAddress(ETH);
-        data = JSON.stringify(data);
-        let result = await this.httpService.postRequest(url, data).then(response=>response.json());
-        return result;
-    }
-
-    stringToBytes32(string){
-        var result = this.web3.utils.fromAscii(string);
-        if(result.length != etalonBytes32.length){
-            let length = etalonBytes32.length - result.length
-            bytes32 = this.addingZero(result,length)
-        }
-        return bytes32
-    }
-
-    addingZero(string, length){
-        for (let   i = 0;  i < length; i++) {
-            string = string+"0"
-        }
-        return string
-    }
-
-    bytes32ToSHA(bytes32){
-        let sha256 = abi.soliditySHA256([ "bytes32" ], [bytes32])
-        sha256 = "0x"+sha256.toString("hex")
-        return sha256;
-    }
-
-    stringToSHA(string){
-        let bytes32 = this.stringToBytes32(string)
-        console.log(bytes32)
-        let sha256 = abi.soliditySHA256([ "bytes32" ], [bytes32]) // SHA
-        sha256 = "0x"+sha256.toString("hex")
-        console.log(sha256)
-        return sha256;
-    }
-
-    stringTo2SHA(string){
-        let bytes32 = this.stringToBytes32(string)
-        let sha256 = abi.soliditySHA256([ "bytes32" ], [abi.soliditySHA256([ "bytes32" ], [bytes32])]) // 2SHA
-        sha256 = "0x"+sha256.toString("hex")
-        return sha256;
     }
 
     getBalance(raw=true){

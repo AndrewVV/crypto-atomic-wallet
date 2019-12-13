@@ -16,7 +16,7 @@ import {
     SELF,
 } from '../../constants';
 
-export default class BitcoinTestLibClass{
+export default class BitcoinTestLib{
     constructor(wallet){
         this.generateAddAndPriv = wallet.generateAddressAndPrivkey;
         this.validator = wallet.validator;
@@ -25,35 +25,16 @@ export default class BitcoinTestLibClass{
         this.networks = wallet.networks.BTCTESTNETWORK
     }
 
-    async createOrder(data){
-        try{
-            let url = "http://localhost:8600/create/order";
-            data["addressToReceive"] = await this.generateAddAndPriv.generateAddress(BTCTEST);
-            data["publicKey"] = await this.privKeyToPublicKey();
-            data = JSON.stringify(data);
-            let result = await this.httpService.postRequest(url, data).then(response=>response.json());
-            return result;
-        }catch (e){
-            console.log(e)   
-        }
-    }
-
-    async privKeyToPublicKey(){
-        let privKey = await this.generateAddAndPriv.generatePrivKey(BTCTEST);
-        let keyPair = bitcoin.ECPair.fromWIF(privKey,this.networks)
-        var publicKey = keyPair.publicKey.toString('hex')
-        return publicKey;
-    }
-
-    getBalance(raw=true){
+    getBalance(raw=true, address){
         return new Promise(async(resolve,reject)=>{
             try{
-                let address = await this.generateAddAndPriv.generateAddress(BTCTEST);
+                if (!address) address = await this.generateAddAndPriv.generateAddress(BTCTEST);
                 this.validator.validateBtcAddress(address)
                 let url = `${BTCTESTAPIPROVIDER}addrs/${address}/balance`;
                 let result = await this.httpService.getRequest(url).then(response=>response.json());
                 this.validator.validateObject(result);
                 let balance = result.balance;
+                // let balance = result.final_balance;
                 if(!raw){
 	                balance = this.toDecimals(balance)
                 }
@@ -100,6 +81,20 @@ export default class BitcoinTestLibClass{
         })
     }
 
+    sendRawTransaction(rawTx){
+        return new Promise(async(resolve,reject)=>{
+            try{
+                let url = `${BTCTESTAPIPROVIDER}txs/push?token=${APITOKENDEV}`
+                let body= JSON.stringify({"tx": rawTx});
+               	let result = await this.httpService.postRequest(url, body).then(response=>response.json())
+               	console.log('Транзакция отправлена')
+                return resolve(result.tx.hash);
+            }catch (e) {
+                return reject(e)
+            }
+        })
+    }
+
   	createSignRawTx(to, amount,fee){
     	return new Promise(async(resolve,reject)=>{
 	  		if(!fee){
@@ -114,7 +109,7 @@ export default class BitcoinTestLibClass{
             fee = this.fromDecimals(fee);
             amount = Math.round(amount)
             fee = Math.round(fee)
-
+            
             let privKey = await this.generateAddAndPriv.generatePrivKey(BTCTEST);
             this.validator.validateString(privKey);
     		let keyring = await bitcoin.ECPair.fromWIF(privKey,this.networks);
@@ -145,11 +140,11 @@ export default class BitcoinTestLibClass{
             try{
 	            this.validator.validateBtcAddress(address);
 	            this.validator.validateNumber(amount);
-	            this.validator.validateNumber(fee);
+                this.validator.validateNumber(fee);
 
-                let balance = await this.getBalance();
+                let balance = await this.getBalance(true, address);
                 if(balance >= amount+fee){
-                	let allUtxo = await this.listUnspent(address);
+                    let allUtxo = await this.listUnspent(address);
                 	let tmpSum = 0;
                 	let requiredUtxo = [];
                 	for(let key in allUtxo){
@@ -164,17 +159,17 @@ export default class BitcoinTestLibClass{
 	                    }
 	                }
 	                let change = tmpSum - amount - fee;
-	                this.validator.validateNumber(change);
+                    this.validator.validateNumber(change);
 	                return resolve({
 	                	"change":change,
 	                    "outputs":requiredUtxo
 	                });
-	                }else{
-                        amount = this.toDecimals(amount)
-                        fee = this.toDecimals(fee)
-                        balance = this.toDecimals(balance)
-                        alert("Insufficient balance: trying to send "+amount+" BTC + "+fee+" BTC fee when having "+balance+" BTC")
-	                }
+	            }else{
+                    amount = this.toDecimals(amount)
+                    fee = this.toDecimals(fee)
+                    balance = this.toDecimals(balance)
+                    console.log("Insufficient balance: trying to send "+amount+" BTC + "+fee+" BTC fee when having "+balance+" BTC")
+	            }
             }catch(e){
                 return reject(e);
             }
