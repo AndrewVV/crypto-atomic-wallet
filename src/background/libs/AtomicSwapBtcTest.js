@@ -5,6 +5,9 @@ const net = bitcoin.networks.testnet;
 import BitcoinTestLib from "./BitcoinTestLib";
 import {
     BTCTEST,
+    BTCTESTAPIPROVIDER,
+    APITOKENDEV,
+    ETALONOX
 } from '../../constants';
 
 export default class AtomicSwapBtcTest extends BitcoinTestLib{
@@ -20,6 +23,45 @@ export default class AtomicSwapBtcTest extends BitcoinTestLib{
         }catch (e){
             console.log(e)   
         }
+    }
+
+    monitoringBuyer(id){
+        let monitoring = setInterval(async() => {
+            let order = await this.dbConnector.getOrderById(id);
+            let status = order[0].status;
+            console.log(status)
+            if(status == "INPROCESS" && order[0].txHashBtc != ""){
+                let url = `${BTCTESTAPIPROVIDER}txs/${order[0].txHashBtc}?token=${APITOKENDEV}`;
+                let result = await this.httpService.getRequest(url).then(response=>response.json());
+                let confirmations = result.confirmations
+                if(confirmations > 0) {
+                    let createTxHash = await this.generateAddAndPriv.wallet.atomicSwaps.ethtest.createOrder(
+                        order[0].sellAmount,
+                        order[0].hashedSecret,
+                        order[0].refundTime,
+                        order[0].addressSellerToReceive
+                    )
+                    await this.dbConnector.addTxHashEth(id, createTxHash)
+                    await this.dbConnector.changeOrderStatus(id, "ORDERCREATEDINSC")
+                }else console.log("confirmations = 0")
+            }else if(status == "REDEEMORDERSC"){
+                let secret = await this.generateAddAndPriv.wallet.atomicSwaps.ethtest.getSecretSwap(order[0].hashedSecret)
+                if(!(secret == ETALONOX)){
+                    let recipientPublicKey = await this.privKeyToPublicKey()
+                    const scriptValues = {
+                        secretHash: order[0].hashedSecret.slice(2),
+                        ownerPublicKey: order[0].publicKeySeller,
+                        recipientPublicKey, 
+                        locktime: order[0].refundTime
+                    }
+                    let amount = order[0].buyAmount;
+                    let txHash = await this.withdrawRawTransaction({scriptValues, secret, amount})
+                    await this.dbConnector.changeOrderStatus(id, "WITHDRAWTXBTC")
+                    console.log("clearInterval, txHash", txHash)
+                    clearInterval(monitoring)
+                }
+            }
+        }, 60000);
     }
 
     createScript(data) {
@@ -85,7 +127,6 @@ export default class AtomicSwapBtcTest extends BitcoinTestLib{
         let txRaw = tx.buildIncomplete()
         txRaw = await this.signTransaction({script,secret,txRaw})
         txRaw = txRaw.toHex()
-        console.log("finish txRaw", txRaw)
         let txHash = await this.sendRawTransaction(txRaw)
         return txHash;
     };

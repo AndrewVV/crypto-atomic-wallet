@@ -21,14 +21,10 @@ import GenerateAddressAndPrivkey from '../core/ianColeman/mnemonicToWallets/Gene
 import Networks from '../core/ianColeman/networks.js';
 import HttpService from '../core/services/HttpService.js';
 import ExchangeRates from '../core/services/ExchangeRates.js';
+import DbConnector from '../core/services/DbConnector.js';
 import CryptoJS from 'crypto-js';
 import moment from 'moment';
 import cryptoRandomString from 'crypto-random-string';
-import {
-    BTCTESTAPIPROVIDER,
-    APITOKENDEV,
-    ETALONOX,
-} from '../../constants';
 
 export default class WalletInterface { 
     constructor(){
@@ -38,6 +34,7 @@ export default class WalletInterface {
         this.httpService = new HttpService();
         this.exchangeRates = new ExchangeRates();
         this.generateAddressAndPrivkey = new GenerateAddressAndPrivkey(this)
+        this.dbConnector = new DbConnector(this)
         this.protocols = {};
         this.atomicSwaps = {};
         if(process.env.ENVIRONMENT_BG === "production"){
@@ -70,7 +67,7 @@ export default class WalletInterface {
                 data["status"] = "CREATED";
                 if(data.buyTicker === "btctest"){
                     let result = await this.atomicSwaps.btctest.createOrderInDB(data);
-                    this.monitoringBuyer(result.id)
+                    this.atomicSwaps.btctest.monitoringBuyer(result.id)
                     return resolve(result);
                 }else if(data.buyTicker === "ethtest"){
                     let result = await this.atomicSwaps.ethtest.createOrderInDB(data);
@@ -84,75 +81,22 @@ export default class WalletInterface {
         });
     }
 
-    monitoringBuyer(id){
-        let monitoring = setInterval(async() => {
-            let order = await this.getOrderById(id);
-            let status = order[0].status;
-            console.log(status)
-            if(status == "INPROCESS" && order[0].txHashBtc != ""){
-                let url = `${BTCTESTAPIPROVIDER}txs/${order[0].txHashBtc}?token=${APITOKENDEV}`;
-                let result = await this.httpService.getRequest(url).then(response=>response.json());
-                let confirmations = result.confirmations
-                if(confirmations > 0) {
-                    let createTxHash = await this.atomicSwaps.ethtest.createOrder(
-                        order[0].sellAmount,
-                        order[0].hashedSecret,
-                        order[0].refundTime,
-                        order[0].addressSellerToReceive
-                    )
-                    url = `http://localhost:8600/order/${id}/txHashEth/${createTxHash}`;
-                    await this.httpService.putRequest(url).then(response=>response.json());
-                    status = "ORDERCREATEDINSC";
-                    url = `http://localhost:8600/order/${id}/status/${status}`;
-                    await this.httpService.putRequest(url).then(response=>response.json());
-                }else console.log("confirmations = 0")
-            }else if(status == "REDEEMORDERSC"){
-                let secret = await this.atomicSwaps.ethtest.getSecretSwap(order[0].hashedSecret)
-
-                if(!(secret == ETALONOX)){
-                    let recipientPublicKey = await this.atomicSwaps.btctest.privKeyToPublicKey()
-                    const scriptValues = {
-                        secretHash: order[0].hashedSecret.slice(2),
-                        ownerPublicKey: order[0].publicKeySeller,
-                        recipientPublicKey, 
-                        locktime: order[0].refundTime
-                    }
-                    let amount = order[0].buyAmount;
-                    let txHash = await this.atomicSwaps.btctest.withdrawRawTransaction({scriptValues, secret, amount})
-                    console.log("txHash ", txHash)
-
-                    status = "WITHDRAWTXBTC";
-                    let url = `http://localhost:8600/order/${id}/status/${status}`;
-                    await this.httpService.putRequest(url).then(response=>response.json());
-                    console.log("clearInterval")
-                    clearInterval(monitoring)
-                }
-            }
-        }, 60000);
-    }
-
     async replyToOrder(dataOrder){
         try{
             let id = dataOrder.idOrder;
             let password = cryptoRandomString({length:16});
             this.password = password;
             let secretHash = this.atomicSwaps.ethtest.stringToSHA(password);
-            await this.addHashedSecret(id, secretHash)
-            let addressSellerToReceive = await this.generateAddressAndPrivkey.generateAddress("ETH")
-            let url = `http://localhost:8600/order/${id}/addressSellerToReceive/${addressSellerToReceive}`;
-            await this.httpService.putRequest(url).then(response=>response.json());
-            let status = "INPROCESS"
-            url = `http://localhost:8600/order/${id}/status/${status}`;
-            await this.httpService.putRequest(url).then(response=>response.json());
-
+            await this.dbConnector.addHashedSecret(id, secretHash)
+            let addressSellerToReceive = await this.generateAddressAndPrivkey.generateAddress("ETH")  // 
+            await this.dbConnector.addAddressSellerToReceive(id, addressSellerToReceive)
+            await this.dbConnector.changeOrderStatus(id, "INPROCESS")
             let ownerPublicKey = await this.atomicSwaps.btctest.privKeyToPublicKey()
-            url = `http://localhost:8600/order/${id}/publicKeySeller/${ownerPublicKey}`;
-            await this.httpService.putRequest(url).then(response=>response.json());
-            let order = await this.getOrderById(id);
+            await this.dbConnector.addPublicKeySeller(id, ownerPublicKey)
+            let order = await this.dbConnector.getOrderById(id);
             let recipientPublicKey = order[0].publicKeyBuyer;
             let locktime = await this.atomicSwaps.ethtest.getTimestampPlusHour();
-            url = `http://localhost:8600/order/${id}/refundTime/${locktime}`;
-            await this.httpService.putRequest(url).then(response=>response.json());
+            await this.dbConnector.addRefundTime(id, locktime)
             let data = {
                 secretHash,
                 ownerPublicKey,
@@ -163,9 +107,8 @@ export default class WalletInterface {
             let scriptAddress = scriptData.scriptAddress;
             let txHash = await this.protocols.btctest.sendTransaction(scriptAddress, order[0].buyAmount)
             console.log("Swap txHash Btc", txHash)
-            url = `http://localhost:8600/order/${id}/txHashBtc/${txHash}`;
-            await this.httpService.putRequest(url).then(response=>response.json());
-            await this.addScriptAddress(id,scriptAddress)
+            await this.dbConnector.addTxHashBtc(id, txHash)
+            await this.dbConnector.addScriptAddress(id,scriptAddress)
             this.monitoringSeller(id)
             return true;
         }catch(e){
@@ -175,53 +118,20 @@ export default class WalletInterface {
 
     monitoringSeller(id){
         let monitoring = setInterval(async() => {
-            let url = `http://localhost:8600/order/id/${id}`;
-            let order = await this.httpService.getRequest(url).then(response=>response.json());
+            let order = await this.dbConnector.getOrderById(id);
             let status = order[0].status;
             console.log(status)
             if(status == "ORDERCREATEDINSC"){
                 let txInfo = await this.protocols.ethtest.web3.eth.getTransaction(order[0].txHashEth)
-                console.log("txInfo.blockNumber", txInfo.blockNumber)
                 if(txInfo.blockNumber){
-                    status = "REDEEMORDERSC"
-                    url = `http://localhost:8600/order/${id}/status/${status}`;
-                    await this.httpService.putRequest(url).then(response=>response.json());
-                    console.log("txInfo.blockNumber = ", txInfo.blockNumber)
+                    await this.dbConnector.changeOrderStatus(id, "REDEEMORDERSC")
                     let bytes32 = this.atomicSwaps.ethtest.stringToBytes32Internal(this.password);
-                    let redeemOrder = await this.atomicSwaps.ethtest.redeemOrder(
-                        order[0].hashedSecret,
-                        bytes32,
-                    )
-                    console.log("redeemOrder ETH txHash", redeemOrder)
-                    console.log("clearInterval")
+                    let txRedeemOrder = await this.atomicSwaps.ethtest.redeemOrder(order[0].hashedSecret, bytes32)
+                    console.log("clearInterval, txRedeemOrder ETH ", txRedeemOrder)
                     clearInterval(monitoring)
                 }
             }
         }, 60000);
-    }
-
-    async getOrders(){
-        let url = `http://localhost:8600/all-orders`;
-        let result = await this.httpService.getRequest(url).then(response=>response.json());
-        return result;
-    }
-
-    async addHashedSecret(id, hashedSecret){
-        let url = `http://localhost:8600/order/${id}/hashedSecret/${hashedSecret}`;
-        let result = await this.httpService.putRequest(url).then(response=>response.json());
-        return result;
-    }
-
-    async addScriptAddress(id, scriptAddress){
-        let url = `http://localhost:8600/order/${id}/scriptAddress/${scriptAddress}`;
-        let result = await this.httpService.putRequest(url).then(response=>response.json());
-        return result;
-    }
-
-    async getOrderById(id){
-        let url = `http://localhost:8600/order/id/${id}`;
-        let result = await this.httpService.getRequest(url).then(response=>response.json());
-        return result;
     }
 
     generateRandomPhrase() {

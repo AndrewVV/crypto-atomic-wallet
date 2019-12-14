@@ -22,7 +22,8 @@ export default class BitcoinTestLib{
         this.validator = wallet.validator;
         this.httpService = wallet.httpService;
         this.exchangeRates = wallet.exchangeRates;
-        this.networks = wallet.networks.BTCTESTNETWORK
+        this.networks = wallet.networks.BTCTESTNETWORK;
+        this.dbConnector = wallet.dbConnector;
     }
 
     getBalance(raw=true, address){

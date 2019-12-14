@@ -66,7 +66,7 @@ chrome.runtime.onMessage.addListener(
 					sendResponse(createOrder)
 					break;
 				case (Actions.getBackground().getOrders):
-					let orders = await walletInterface.getOrders();
+					let orders = await walletInterface.dbConnector.getOrders();
 					sendResponse(orders)
 					break;
 				case (Actions.getBackground().replyToOrder):
