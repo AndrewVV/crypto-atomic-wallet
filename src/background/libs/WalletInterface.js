@@ -24,7 +24,6 @@ import ExchangeRates from '../core/services/ExchangeRates.js';
 import DbConnector from '../core/services/DbConnector.js';
 import CryptoJS from 'crypto-js';
 import moment from 'moment';
-import cryptoRandomString from 'crypto-random-string';
 
 export default class WalletInterface { 
     constructor(){
@@ -58,80 +57,33 @@ export default class WalletInterface {
         this.mnemonic = new Mnemonic();
         this.randomizer = new Randomizer(0, 255);
         console.log(`Atomic wallet is working in ${process.env.ENVIRONMENT_BG}`);
-        this.password;
     }
 
     createOrder(data){
         return new Promise(async(resolve, reject)=>{
             try{
-                data["status"] = "CREATED";
-                if(data.buyTicker === "btctest"){
-                    let result = await this.atomicSwaps.btctest.createOrderInDB(data);
-                    this.atomicSwaps.btctest.monitoringBuyer(result.id)
-                    return resolve(result);
-                }else if(data.buyTicker === "ethtest"){
-                    let result = await this.atomicSwaps.ethtest.createOrderInDB(data);
-                    this.monitoringBuyer(result.id)
-                    return resolve(result);
-                }
-                else alert("createOrder in WI WRONG")
+                let result = await this.atomicSwaps[data.buyTicker].createOrderInDB(data);
+                this.atomicSwaps[data.buyTicker].monitoringBuyer(result.id)
+                return resolve(result);
             }catch (e) {
                 return reject(e);
             }
         });
     }
 
-    async replyToOrder(dataOrder){
+    async replyToOrder(idOrder){
         try{
-            let id = dataOrder.idOrder;
-            let password = cryptoRandomString({length:16});
-            this.password = password;
-            let secretHash = this.atomicSwaps.ethtest.stringToSHA(password);
-            await this.dbConnector.addHashedSecret(id, secretHash)
-            let addressSellerToReceive = await this.generateAddressAndPrivkey.generateAddress("ETH")  // 
-            await this.dbConnector.addAddressSellerToReceive(id, addressSellerToReceive)
-            await this.dbConnector.changeOrderStatus(id, "INPROCESS")
-            let ownerPublicKey = await this.atomicSwaps.btctest.privKeyToPublicKey()
-            await this.dbConnector.addPublicKeySeller(id, ownerPublicKey)
-            let order = await this.dbConnector.getOrderById(id);
-            let recipientPublicKey = order[0].publicKeyBuyer;
-            let locktime = await this.atomicSwaps.ethtest.getTimestampPlusHour();
-            await this.dbConnector.addRefundTime(id, locktime)
-            let data = {
-                secretHash,
-                ownerPublicKey,
-                recipientPublicKey,
-                locktime
-            }
-            let scriptData = this.atomicSwaps.btctest.createScript(data);
-            let scriptAddress = scriptData.scriptAddress;
-            let txHash = await this.protocols.btctest.sendTransaction(scriptAddress, order[0].buyAmount)
-            console.log("Swap txHash Btc", txHash)
-            await this.dbConnector.addTxHashBtc(id, txHash)
-            await this.dbConnector.addScriptAddress(id,scriptAddress)
-            this.monitoringSeller(id)
-            return true;
+            let order = await this.dbConnector.getOrderById(idOrder.id);
+            let result = await this.atomicSwaps[order.sellTicker].replyToOrder(
+                idOrder.id,
+                order.publicKeyBuyer,
+                order.buyAmount,
+                order.addressBuyerToReceive,
+            )
+            return result;
         }catch(e){
             console.log(e)
         }
-    }
-
-    monitoringSeller(id){
-        let monitoring = setInterval(async() => {
-            let order = await this.dbConnector.getOrderById(id);
-            let status = order[0].status;
-            console.log(status)
-            if(status == "ORDERCREATEDINSC"){
-                let txInfo = await this.protocols.ethtest.web3.eth.getTransaction(order[0].txHashEth)
-                if(txInfo.blockNumber){
-                    await this.dbConnector.changeOrderStatus(id, "REDEEMORDERSC")
-                    let bytes32 = this.atomicSwaps.ethtest.stringToBytes32Internal(this.password);
-                    let txRedeemOrder = await this.atomicSwaps.ethtest.redeemOrder(order[0].hashedSecret, bytes32)
-                    console.log("clearInterval, txRedeemOrder ETH ", txRedeemOrder)
-                    clearInterval(monitoring)
-                }
-            }
-        }, 60000);
     }
 
     generateRandomPhrase() {

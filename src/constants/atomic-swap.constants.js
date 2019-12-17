@@ -1,11 +1,27 @@
 const CONTRACT_ADDRESS = '0x2FC216fE00774921D975e299F35FD12DF1049f3d';
 const ABI = [ { "constant": false, "inputs": [ { "name": "_hashedSecret", "type": "bytes32" }, { "name": "_refundTime", "type": "uint256" }, { "name": "_participant", "type": "address" } ], "name": "initiate", "outputs": [], "payable": true, "stateMutability": "payable", "type": "function" }, { "constant": false, "inputs": [ { "name": "_hashedSecret", "type": "bytes32" }, { "name": "_secret", "type": "bytes32" } ], "name": "redeem", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": false, "inputs": [ { "name": "_hashedSecret", "type": "bytes32" } ], "name": "refund", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "payable": false, "stateMutability": "nonpayable", "type": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": true, "name": "_hashedSecret", "type": "bytes32" }, { "indexed": false, "name": "_refundTime", "type": "uint256" } ], "name": "Refunded", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "name": "_hashedSecret", "type": "bytes32" }, { "indexed": false, "name": "_secret", "type": "bytes32" }, { "indexed": false, "name": "_redeemTime", "type": "uint256" } ], "name": "Redeemed", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "name": "_hashedSecret", "type": "bytes32" }, { "indexed": false, "name": "_initTimestamp", "type": "uint256" }, { "indexed": false, "name": "_refundTime", "type": "uint256" }, { "indexed": true, "name": "_participant", "type": "address" }, { "indexed": true, "name": "_initiator", "type": "address" }, { "indexed": false, "name": "_value", "type": "uint256" } ], "name": "Initiated", "type": "event" }, { "constant": true, "inputs": [ { "name": "_secret", "type": "bytes32" } ], "name": "bytes32To2SHA256", "outputs": [ { "name": "", "type": "bytes32" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [ { "name": "_secret", "type": "bytes32" } ], "name": "bytes32ToRipemd160", "outputs": [ { "name": "", "type": "bytes20" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [ { "name": "_secret", "type": "bytes32" } ], "name": "bytes32ToSHA256", "outputs": [ { "name": "", "type": "bytes32" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [ { "name": "_hashedSecret", "type": "bytes32" } ], "name": "getBalanceSwap", "outputs": [ { "name": "", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [ { "name": "_hashedSecret", "type": "bytes32" } ], "name": "getSecretSwap", "outputs": [ { "name": "", "type": "bytes32" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "getTimestamp", "outputs": [ { "name": "", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "getTimestampPlusHour", "outputs": [ { "name": "", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [ { "name": "source", "type": "string" } ], "name": "stringTo2SHA256", "outputs": [ { "name": "", "type": "bytes32" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [ { "name": "source", "type": "string" } ], "name": "stringToBytes32", "outputs": [ { "name": "result", "type": "bytes32" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [ { "name": "_secret", "type": "string" } ], "name": "stringToRipemd160", "outputs": [ { "name": "", "type": "bytes20" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [ { "name": "source", "type": "string" } ], "name": "stringToSHA256", "outputs": [ { "name": "", "type": "bytes32" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [ { "name": "", "type": "bytes32" } ], "name": "swaps", "outputs": [ { "name": "hashedSecret", "type": "bytes32" }, { "name": "secret", "type": "bytes32" }, { "name": "initTimestamp", "type": "uint256" }, { "name": "refundTime", "type": "uint256" }, { "name": "initiator", "type": "address" }, { "name": "nonce", "type": "uint256" }, { "name": "participant", "type": "address" }, { "name": "value", "type": "uint256" }, { "name": "emptied", "type": "bool" }, { "name": "initiated", "type": "bool" } ], "payable": false, "stateMutability": "view", "type": "function" } ];
 const GASLIMITSC = 200000;
-const ETALONOX = "0x0000000000000000000000000000000000000000000000000000000000000000";
+const ETALON_OX = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 export {
     CONTRACT_ADDRESS,
     ABI,
     GASLIMITSC,
-    ETALONOX,
+    ETALON_OX,
+}
+
+const CREATED_ORDER = "CREATED_ORDER";
+const REPLIED_TO_ORDER = "REPLIED_TO_ORDER";
+const CREATED_ORDER_IN_SC = "CREATED_ORDER_IN_SC";
+const REDEEMED_ORDER_IN_SC = "REDEEMED_ORDER_IN_SC";
+const SEND_TX_BTC = "SEND_TX_BTC";
+const WITHDRAW_TX_BTC = "WITHDRAW_TX_BTC";
+
+export {
+    CREATED_ORDER,
+    REPLIED_TO_ORDER,
+    CREATED_ORDER_IN_SC,
+    REDEEMED_ORDER_IN_SC,
+    SEND_TX_BTC,
+    WITHDRAW_TX_BTC,
 }

@@ -21008,14 +21008,14 @@ $(document).ready(function () {
     });
   });
   $("#reply-to-order").click(function _callee3() {
-    var idOrder, data, result;
+    var id, data, result;
     return regeneratorRuntime.async(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            idOrder = document.getElementById("id-order").value;
+            id = document.getElementById("id-order").value;
             data = {
-              idOrder: idOrder
+              id: id
             };
             _context3.next = 4;
             return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {

@@ -38,6 +38,12 @@ export default class DbConnector {
         return result;
     }
 
+    async addPublicKeyBuyer(id, ownerPublicKey){
+        let url = `http://localhost:8600/order/${id}/publicKeyBuyer/${ownerPublicKey}`;
+        let result = await this.httpService.putRequest(url).then(response=>response.json());
+        return result;
+    }
+
     async addPublicKeySeller(id, ownerPublicKey){
         let url = `http://localhost:8600/order/${id}/publicKeySeller/${ownerPublicKey}`;
         let result = await this.httpService.putRequest(url).then(response=>response.json());
@@ -58,6 +64,12 @@ export default class DbConnector {
 
     async addTxHashEth(id, txHash){
         let url = `http://localhost:8600/order/${id}/txHashEth/${txHash}`;
+        let result = await this.httpService.putRequest(url).then(response=>response.json());
+        return result;
+    }
+
+    async addInternalSecret(id, secret){
+        let url = `http://localhost:8600/order/${id}/secret/${secret}`;
         let result = await this.httpService.putRequest(url).then(response=>response.json());
         return result;
     }

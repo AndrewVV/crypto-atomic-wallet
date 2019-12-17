@@ -1,4 +1,5 @@
 const bitcoin = require('bitcoinjs-lib');
+import cryptoRandomString from 'crypto-random-string';
 const bitcoinjs = require("../core/ianColeman/mnemonicToWallets/bitcoinjs-3.3.2");
 const net = bitcoin.networks.testnet;
 
@@ -7,7 +8,13 @@ import {
     BTCTEST,
     BTCTESTAPIPROVIDER,
     APITOKENDEV,
-    ETALONOX
+    ETALON_OX,
+    CREATED_ORDER,
+    REPLIED_TO_ORDER,
+    CREATED_ORDER_IN_SC,
+    REDEEMED_ORDER_IN_SC,
+    SEND_TX_BTC,
+    WITHDRAW_TX_BTC,
 } from '../../constants';
 
 export default class AtomicSwapBtcTest extends BitcoinTestLib{
@@ -15,7 +22,8 @@ export default class AtomicSwapBtcTest extends BitcoinTestLib{
     async createOrderInDB(data){
         try{
             let url = "http://localhost:8600/create/order";
-            data["addressToReceive"] = await this.generateAddAndPriv.generateAddress(BTCTEST);
+            data["status"] = CREATED_ORDER;
+            data["addressBuyerToReceive"] = await this.generateAddAndPriv.generateAddress(BTCTEST);
             data["publicKeyBuyer"] = await this.privKeyToPublicKey();
             data = JSON.stringify(data);
             let result = await this.httpService.postRequest(url, data).then(response=>response.json());
@@ -28,36 +36,89 @@ export default class AtomicSwapBtcTest extends BitcoinTestLib{
     monitoringBuyer(id){
         let monitoring = setInterval(async() => {
             let order = await this.dbConnector.getOrderById(id);
-            let status = order[0].status;
+            let status = order.status;
             console.log(status)
-            if(status == "INPROCESS" && order[0].txHashBtc != ""){
-                let url = `${BTCTESTAPIPROVIDER}txs/${order[0].txHashBtc}?token=${APITOKENDEV}`;
+            if(status == REPLIED_TO_ORDER && order.txHashBtc != ""){
+                let url = `${BTCTESTAPIPROVIDER}txs/${order.txHashBtc}?token=${APITOKENDEV}`;
                 let result = await this.httpService.getRequest(url).then(response=>response.json());
                 let confirmations = result.confirmations
                 if(confirmations > 0) {
-                    let createTxHash = await this.generateAddAndPriv.wallet.atomicSwaps.ethtest.createOrder(
-                        order[0].sellAmount,
-                        order[0].hashedSecret,
-                        order[0].refundTime,
-                        order[0].addressSellerToReceive
+                    let createTxHash = await this.wallet.atomicSwaps.ethtest.createOrder(
+                        order.sellAmount,
+                        order.hashedSecret,
+                        order.refundTime,
+                        order.addressSellerToReceive
                     )
+                    console.log("createOrder ETH txHash",createTxHash)
                     await this.dbConnector.addTxHashEth(id, createTxHash)
-                    await this.dbConnector.changeOrderStatus(id, "ORDERCREATEDINSC")
-                }else console.log("confirmations = 0")
-            }else if(status == "REDEEMORDERSC"){
-                let secret = await this.generateAddAndPriv.wallet.atomicSwaps.ethtest.getSecretSwap(order[0].hashedSecret)
-                if(!(secret == ETALONOX)){
+                    await this.dbConnector.changeOrderStatus(id, CREATED_ORDER_IN_SC)
+                }
+            }else if(status == REDEEMED_ORDER_IN_SC){
+                let secret = await this.wallet.atomicSwaps.ethtest.getSecretSwap(order.hashedSecret)
+                if(!(secret == ETALON_OX)){
                     let recipientPublicKey = await this.privKeyToPublicKey()
                     const scriptValues = {
-                        secretHash: order[0].hashedSecret.slice(2),
-                        ownerPublicKey: order[0].publicKeySeller,
+                        secretHash: order.hashedSecret.slice(2),
+                        ownerPublicKey: order.publicKeySeller,
                         recipientPublicKey, 
-                        locktime: order[0].refundTime
+                        locktime: order.refundTime
                     }
-                    let amount = order[0].buyAmount;
+                    let amount = order.buyAmount;
                     let txHash = await this.withdrawRawTransaction({scriptValues, secret, amount})
-                    await this.dbConnector.changeOrderStatus(id, "WITHDRAWTXBTC")
+                    await this.dbConnector.changeOrderStatus(id, WITHDRAW_TX_BTC)
                     console.log("clearInterval, txHash", txHash)
+                    clearInterval(monitoring)
+                }
+            }
+        }, 60000);
+    }
+
+    async replyToOrder(id, recipientPublicKey, buyAmount, addressBuyerToReceive){
+        let password = cryptoRandomString({length:16});
+        let secretHash = this.wallet.atomicSwaps.ethtest.stringToSHA(password);
+        await this.dbConnector.addHashedSecret(id, secretHash);
+        let addressSellerToReceive = await this.generateAddAndPriv.generateAddress(BTCTEST)
+        await this.dbConnector.addAddressSellerToReceive(id, addressSellerToReceive)
+        await this.dbConnector.changeOrderStatus(id, REPLIED_TO_ORDER)
+        let publicKeySeller = await this.privKeyToPublicKey();
+        await this.dbConnector.addPublicKeySeller(id, publicKeySeller)
+        let locktime = await this.wallet.atomicSwaps.ethtest.getTimestampPlusHour();
+        await this.dbConnector.addRefundTime(id, locktime);
+        let createTxHash = await this.wallet.atomicSwaps.ethtest.createOrder(
+            buyAmount,
+            secretHash,
+            locktime,
+            addressBuyerToReceive
+        )
+        await this.dbConnector.addTxHashEth(id, createTxHash)
+        this.monitoringSeller(id, password)
+        return true;
+    }
+
+    monitoringSeller(id, pw){
+        let monitoring = setInterval(async() => {
+            let order = await this.dbConnector.getOrderById(id);
+            let status = order.status;
+            console.log(status)
+            if(status == SEND_TX_BTC){
+                let url = `${BTCTESTAPIPROVIDER}txs/${order.txHashBtc}?token=${APITOKENDEV}`;
+                let result = await this.httpService.getRequest(url).then(response=>response.json());
+                let confirmations = result.confirmations
+                if(confirmations > 0) {
+                    let recipientPublicKey = await this.privKeyToPublicKey()
+                    const scriptValues = {
+                        secretHash: order.hashedSecret,
+                        ownerPublicKey: order.publicKeyBuyer,
+                        recipientPublicKey,
+                        locktime: order.refundTime
+                    }
+                    let amount = order.sellAmount;
+                    let secret = this.wallet.atomicSwaps.ethtest.stringToBytes32Internal(pw)
+                    console.log("secretsecret", secret)
+                    let txHash = await this.withdrawRawTransaction({scriptValues, secret, amount})
+                    await this.dbConnector.addInternalSecret(id, secret)
+                    await this.dbConnector.changeOrderStatus(id, WITHDRAW_TX_BTC)
+                    console.log("clearInterval, withdrawRawTransaction BTC txHash", txHash)
                     clearInterval(monitoring)
                 }
             }
@@ -109,7 +170,6 @@ export default class AtomicSwapBtcTest extends BitcoinTestLib{
         amount = amount - feeValue;
         let utxoData = await this.getUtxos(scriptAddress, amount, feeValue);
         let utxos = utxoData.outputs;
-        console.log("utxos", utxos)
         let txid = utxos[0].txid;
         let vout = utxos[0].vout;
         const totalUnspent = amount;

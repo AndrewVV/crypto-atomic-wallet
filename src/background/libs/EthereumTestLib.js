@@ -26,6 +26,7 @@ export default class EthereumTestLibClass{
         this.validator = wallet.validator;
         this.nonceService = new NonceService(this.web3,this.validator,this.logger);
         this.httpService = wallet.httpService;
+        this.dbConnector = wallet.dbConnector;
     }
 
     getBalance(raw=true){

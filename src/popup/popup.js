@@ -47,8 +47,8 @@ $(document).ready(function() {
     });
 
     $("#reply-to-order").click(async()=> {
-        let idOrder = document.getElementById("id-order").value
-        let data = {idOrder}
+        let id = document.getElementById("id-order").value
+        let data = {id}
         let result = await new Promise((resolve, reject) => {
             chrome.runtime.sendMessage({"action": (Actions.getBackground().replyToOrder), data}, response => {
                     resolve(response)

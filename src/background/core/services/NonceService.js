@@ -87,7 +87,6 @@ class NonceService{
                 try{
                     let txpool = await this.web3.eth.txpool.content();
                 }catch(err){
-                    console.log('Could not connect to txpool')
                     return resolve(false);
                 }
                 let tx = {};

@@ -18,6 +18,7 @@ import {
 
 export default class BitcoinTestLib{
     constructor(wallet){
+        this.wallet = wallet;
         this.generateAddAndPriv = wallet.generateAddressAndPrivkey;
         this.validator = wallet.validator;
         this.httpService = wallet.httpService;
@@ -74,7 +75,7 @@ export default class BitcoinTestLib{
                 let url = `${BTCTESTAPIPROVIDER}txs/push?token=${APITOKENDEV}`
                 let body= JSON.stringify({"tx": rawTx});
                	let result = await this.httpService.postRequest(url, body).then(response=>response.json())
-               	console.log('Транзакция отправлена')
+               	console.log('Tx was sent')
                 return resolve(result.tx.hash);
             }catch (e) {
                 return reject(e)
@@ -88,7 +89,7 @@ export default class BitcoinTestLib{
                 let url = `${BTCTESTAPIPROVIDER}txs/push?token=${APITOKENDEV}`
                 let body= JSON.stringify({"tx": rawTx});
                	let result = await this.httpService.postRequest(url, body).then(response=>response.json())
-               	console.log('Транзакция отправлена')
+               	console.log('Raw tx was sent')
                 return resolve(result.tx.hash);
             }catch (e) {
                 return reject(e)
