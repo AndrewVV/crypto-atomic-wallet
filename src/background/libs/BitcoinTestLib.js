@@ -36,10 +36,12 @@ export default class BitcoinTestLib{
                 let result = await this.httpService.getRequest(url).then(response=>response.json());
                 this.validator.validateObject(result);
                 let balance = result.balance;
+                console.log("balance btc", balance)
                 // let balance = result.final_balance;
                 if(!raw){
 	                balance = this.toDecimals(balance)
                 }
+                console.log("balance btc", balance)
                 this.validator.validateNumber(balance);
                 return resolve(balance);
             }catch (e) {

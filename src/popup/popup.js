@@ -7,7 +7,9 @@ $(document).ready(function() {
         let sellTicker = document.getElementById("sell-crypto").value
         if(buyTicker === sellTicker && buyTicker === "ethtest") {
             document.getElementById("sell-crypto").value = "btctest"
-        } else if (buyTicker === sellTicker && sellTicker === "btctest") {
+        }else if (buyTicker === sellTicker && sellTicker === "btctest") {
+            document.getElementById("sell-crypto").value = "ethtest"
+        }else if (buyTicker === "ltctest") {
             document.getElementById("sell-crypto").value = "ethtest"
         } else alert("some problem with #buy-crypto")
     });
@@ -19,6 +21,9 @@ $(document).ready(function() {
         }else if(document.getElementById("buy-crypto").value === "ethtest"){
             let amount = document.getElementById("amount-for-purchase").value
             $('#your-spend-amount').html(amount/50)
+        }else if(document.getElementById("buy-crypto").value === "ltctest"){
+            let amount = document.getElementById("amount-for-purchase").value
+            $('#your-spend-amount').html(amount/4)
         }
     });
 

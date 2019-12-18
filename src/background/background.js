@@ -1,4 +1,4 @@
-import WalletInterface from './libs/WalletInterface';
+import WalletInterface from './WalletInterface.js';
 import ActionsClass from '../common/class.actions.js';
 let walletInterface = new WalletInterface();
 const Actions = new ActionsClass();

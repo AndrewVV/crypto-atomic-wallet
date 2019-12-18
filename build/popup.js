@@ -20932,6 +20932,8 @@ $(document).ready(function () {
       document.getElementById("sell-crypto").value = "btctest";
     } else if (buyTicker === sellTicker && sellTicker === "btctest") {
       document.getElementById("sell-crypto").value = "ethtest";
+    } else if (buyTicker === "ltctest") {
+      document.getElementById("sell-crypto").value = "ethtest";
     } else alert("some problem with #buy-crypto");
   });
   $("#amount-for-purchase").on('input', function () {
@@ -20941,6 +20943,9 @@ $(document).ready(function () {
     } else if (document.getElementById("buy-crypto").value === "ethtest") {
       var _amount = document.getElementById("amount-for-purchase").value;
       $('#your-spend-amount').html(_amount / 50);
+    } else if (document.getElementById("buy-crypto").value === "ltctest") {
+      var _amount2 = document.getElementById("amount-for-purchase").value;
+      $('#your-spend-amount').html(_amount2 / 4);
     }
   });
   $("#create-order").on("click", function _callee() {

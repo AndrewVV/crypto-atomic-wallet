@@ -12,7 +12,6 @@ import {
     INFURAMAINNET,
     RATEUAHUSD,
     CONFIRM,
-    PENDING,
     DEPOSIT,
     SEND,
     SELF,
@@ -22,9 +21,8 @@ export default class EthereumLibClass{
     constructor(wallet){
         this.generateAddAndPriv = wallet.generateAddressAndPrivkey;
         this.web3 = new Web3(new Web3.providers.HttpProvider(INFURAMAINNET));
-        this.logger = wallet.logger;
         this.validator = wallet.validator;
-        this.nonceService = new NonceService(this.web3,this.validator,this.logger);
+        this.nonceService = new NonceService(this.web3,this.validator);
         this.httpService = wallet.httpService;
     }
 
@@ -112,7 +110,7 @@ export default class EthereumLibClass{
                             let price = 180; // TODO there should be a request to API Binance 
                             let moneyQuantity = (amount*price).toFixed(2);
                             let id = result.length+1;
-                            let txData = this.formatFrontTxData(timeStamp, id, action, amount, moneyQuantity, hash, from, to, txFee);
+                            let txData = this.formatFrontTxData(timeStamp, id, action, status=CONFIRM, amount, moneyQuantity, hash, from, to, txFee);
                             result.push(txData)
                             if(result.length > 9) break;
                         }
@@ -125,7 +123,7 @@ export default class EthereumLibClass{
 		})
 	}
 
-	formatFrontTxData(timeStamp, id, action, status=CONFIRM, amount, moneyQuantity, hash, from, to, txFee){
+	formatFrontTxData(timeStamp, id, action, status, amount, moneyQuantity, hash, from, to, txFee){
 		let txData = {
             timeStamp,
             id,

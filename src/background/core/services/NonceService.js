@@ -1,10 +1,9 @@
 'use strict';
-const NONCE_SUBJECT ='NONCE_SUBJECT';
+const NONCE_SUBJECT = 'NONCE_SUBJECT';
 class NonceService{
-    constructor(web3,validator,logger){
+    constructor(web3,validator){
         this.web3  = web3;
         this.validator = validator;
-        this.logger= logger;
     }
 
     getNextNonce(address)
@@ -45,7 +44,7 @@ class NonceService{
                         result.nonces.push(txNonce);
                     }
                 }catch(err){
-                    this.logger.logError(NONCE_SUBJECT,err.message,err);
+                    console.log(NONCE_SUBJECT,err.message,err);
                 }
                 this.validator.validateObject(result,'Nonce Array');
                 return resolve(result);

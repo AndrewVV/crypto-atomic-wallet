@@ -1,7 +1,7 @@
 const bitcoin = require('bitcoinjs-lib');
 import validator from 'wallet-address-validator';
 import WeiConverter from '../core/helpers/WeiConverter';
-const network = bitcoin.networks.testnet
+
 import {
     LTC,
     LTCTEST,
@@ -20,15 +20,18 @@ import {
 
 export default class LitecoinTestLibClass{
     constructor(wallet){
+        this.wallet = wallet;
         this.generateAddAndPriv = wallet.generateAddressAndPrivkey;
         this.validator = wallet.validator;
         this.httpService = wallet.httpService;
+        this.dbConnector = wallet.dbConnector;
+        this.network = bitcoin.networks.testnet;
     }
 
-    getBalance(raw=true){
+    getBalance(raw=true, address){
         return new Promise(async(resolve,reject)=>{
             try{
-                let address = await this.generateAddAndPriv.generateAddress(LTCTEST);
+                if (!address) address = await this.generateAddAndPriv.generateAddress(LTCTEST);
                 this.validator.validateBtcAddress(address)
                 let url = `${LTCTESTAPIPROVIDER}get_address_balance/LTCTEST/${address}`
                 let result = await this.httpService.getRequest(url).then(response=>response.json());
@@ -66,7 +69,22 @@ export default class LitecoinTestLibClass{
                 let url = `${LTCTESTAPIPROVIDER}send_tx/LTCTEST`
                 let body = JSON.stringify({"tx_hex": rawTx});
                	let result = await this.httpService.postRequest(url, body).then(response=>response.json())
-               	console.log('Транзакция отправлена')
+               	console.log('Tx was sent')
+                return resolve(result.data.txid);
+            }catch (e) {
+                return reject(e)
+            }
+        })
+    }
+
+    sendRawTransaction(rawTx){
+        return new Promise(async(resolve,reject)=>{
+            try{
+                console.log("rawTx", rawTx)
+                let url = `${LTCTESTAPIPROVIDER}send_tx/LTCTEST`
+                let body= JSON.stringify({"tx_hex": rawTx});
+               	let result = await this.httpService.postRequest(url, body).then(response=>response.json())
+               	console.log('Raw tx was sent')
                 return resolve(result.data.txid);
             }catch (e) {
                 return reject(e)
@@ -92,8 +110,8 @@ export default class LitecoinTestLibClass{
 
     		let privKey = await this.generateAddAndPriv.generatePrivKey(LTCTEST);
             this.validator.validateString(privKey);
-    		let keyring = await bitcoin.ECPair.fromWIF(privKey,network);
-			let txb = new bitcoin.TransactionBuilder(network)
+    		let keyring = await bitcoin.ECPair.fromWIF(privKey,this.network);
+			let txb = new bitcoin.TransactionBuilder(this.network)
 			let from = await this.generateAddAndPriv.generateAddress(LTCTEST);
             this.validator.validateBtcAddress(from);
 			let utxoData = await this.getUtxos(from, amount, fee);
@@ -122,15 +140,14 @@ export default class LitecoinTestLibClass{
 	            this.validator.validateNumber(amount);
 	            this.validator.validateNumber(fee);
 
-                let balance = await this.getBalance();
+                let balance = await this.getBalance(true, address);
                 balance = parseFloat(balance);
                	balance = this.fromDecimals(balance);
                	amount = parseFloat(amount);
-               	amount = Math.round(amount)
-               	fee = parseFloat(fee);
-
+               	amount = Math.round(amount);
+                fee = parseFloat(fee);
                 if(balance >= amount+fee){
-                	let allUtxo = await this.listUnspent(address);
+                    let allUtxo = await this.listUnspent(address);
                 	let tmpSum = 0;
                 	let requiredUtxo = [];
                 	for(let key in allUtxo){
@@ -147,7 +164,7 @@ export default class LitecoinTestLibClass{
                		tmpSum = this.fromDecimals(tmpSum);
                		tmpSum = Math.round(tmpSum)
 
-	                let change = tmpSum - amount - fee;
+                    let change = tmpSum - amount - fee;
 	                this.validator.validateNumber(change);
 	                return resolve({
 	                	"change":change,
