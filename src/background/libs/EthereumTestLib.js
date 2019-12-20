@@ -12,7 +12,6 @@ import {
     INFURATESTNET,
     RATEUAHUSD,
     CONFIRM,
-    PENDING,
     DEPOSIT,
     SEND,
     SELF,
@@ -28,10 +27,10 @@ export default class EthereumTestLibClass{
         this.dbConnector = wallet.dbConnector;
     }
 
-    getBalance(raw=true){
+    getBalance(raw=true, address){
         return new Promise(async(resolve,reject)=>{
             try{
-                let address = await this.generateAddAndPriv.generateAddress(ETH);
+                if (!address) address = await this.generateAddAndPriv.generateAddress(ETH);
                 let balance = await this.web3.eth.getBalance(address);
                 if(!raw){
                     balance = this.toDecimals(balance);

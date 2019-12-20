@@ -4,8 +4,8 @@ import BitcoinLib from './libs/BitcoinLib';
 import BitcoinTestLib from './libs/BitcoinTestLib';
 import BitcoinLibBip49 from './libs/BitcoinLibBip49';
 import BitcoinTestLibBip49 from './libs/BitcoinTestLibBip49';
-import BitcoinCashLib from './libs/BitcoinCashLib';
-import BitcoinCashTestLib from './libs/BitcoinCashTestLib.js';
+// import BitcoinCashLib from './libs/BitcoinCashLib';
+// import BitcoinCashTestLib from './libs/BitcoinCashTestLib.js';
 import LitecoinLib from './libs/LitecoinLib';
 import LitecoinTestLib from './libs/LitecoinTestLib';
 import DashLib from './libs/DashLib';
@@ -46,7 +46,7 @@ export default class WalletInterface {
         }else if(process.env.ENVIRONMENT_BG === "development"){
             this.protocols.btctest = new BitcoinTestLib(this);
             this.protocols.btc49test = new BitcoinTestLibBip49(this);
-            this.protocols.bchtest = new BitcoinCashTestLib(this);        
+            // this.protocols.bchtest = new BitcoinCashTestLib(this);        
             this.protocols.ethtest = new EthereumTestLib(this);
             this.protocols.ltctest = new LitecoinTestLib(this);
             this.protocols.dashtest = new DashTestLib(this);

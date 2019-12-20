@@ -17,6 +17,7 @@ class GenerateAddressAndPrivkey{
     generatePrivKey(ticker){
         return new Promise(async(resolve,reject)=>{
             let mnemonicToWallet = new MnemonicToWallets(this.wallet,ticker,1);
+            if(!this.phrase) this.phrase = ""; // TODO for test
             return resolve(await mnemonicToWallet.converterMnemonicToPrivkey(this.phrase));
         })
     }

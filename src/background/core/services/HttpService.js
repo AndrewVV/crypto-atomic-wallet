@@ -1,28 +1,29 @@
-const GET_METHOD = 'GET';
-const POST_METHOD = 'POST';
-const PUT_METHOD = 'PUT';
+import fetch from 'node-fetch'
+const GET = 'GET';
+const POST = 'POST';
+const PUT = 'PUT';
 
 class HttpService{
     constructor(){
     };
 
-    postRequest(req_url,data,headers) {
-        return new Promise(async(resolve,reject)=>{
+    postRequest(url, data, headers) {
+        return new Promise(async(resolve,reject) => {
             try{
                 if(!headers){
                     headers = {"Content-Type": "application/json"};
                 }
-                var result = await this.httpRequest(POST_METHOD, req_url,data,headers)
+                var result = await this.httpRequest(POST, url, data, headers)
                 return resolve(result);
             }catch(e){
                 return reject(e);
             }
         });
     };
-    getRequest(req_url,data,headers) {
-        return new Promise(async(resolve,reject)=>{
+    getRequest(url, data, headers) {
+        return new Promise(async(resolve,reject) => {
             try{
-                var result = await this.httpRequest(GET_METHOD, req_url,data,headers)
+                var result = await this.httpRequest(GET, url, data, headers)
                 return resolve(result);
             }catch(e){
                 return reject(e);
@@ -30,10 +31,10 @@ class HttpService{
         });
     };
 
-    putRequest(req_url,data,headers) {
-        return new Promise(async(resolve,reject)=>{
+    putRequest(url, data, headers) {
+        return new Promise(async(resolve,reject) => {
             try{
-                var result = await this.httpRequest(PUT_METHOD, req_url,data,headers)
+                var result = await this.httpRequest(PUT, url, data, headers)
                 return resolve(result);
             }catch(e){
                 return reject(e);
@@ -41,18 +42,17 @@ class HttpService{
         });
     };
     
-    httpRequest(method,req_url,data,headers={}){
-        return new Promise(async(resolve,reject)=>{
-
-            var options={
-                body:data,
+    httpRequest(method, url, data, headers={}) {
+        return new Promise(async(resolve,reject) => {
+            let options = {
+                body: data,
                 method: method,
                 headers: headers
             };
-            fetch(req_url,options).then((res)=>{
+            fetch(url, options).then((res) => {
                 return resolve(res);
-            }).catch(function (err) {
-                return reject(err)
+            }).catch( e =>  {
+                return reject(e)
             });
         })
     }

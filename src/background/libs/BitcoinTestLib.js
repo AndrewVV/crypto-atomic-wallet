@@ -36,12 +36,9 @@ export default class BitcoinTestLib{
                 let result = await this.httpService.getRequest(url).then(response=>response.json());
                 this.validator.validateObject(result);
                 let balance = result.balance;
-                console.log("balance btc", balance)
-                // let balance = result.final_balance;
                 if(!raw){
 	                balance = this.toDecimals(balance)
                 }
-                console.log("balance btc", balance)
                 this.validator.validateNumber(balance);
                 return resolve(balance);
             }catch (e) {
@@ -89,7 +86,7 @@ export default class BitcoinTestLib{
         return new Promise(async(resolve,reject)=>{
             try{
                 let url = `${BTCTESTAPIPROVIDER}txs/push?token=${APITOKENDEV}`
-                let body= JSON.stringify({"tx": rawTx});
+                let body = JSON.stringify({"tx": rawTx});
                	let result = await this.httpService.postRequest(url, body).then(response=>response.json())
                	console.log('Raw tx was sent')
                 return resolve(result.tx.hash);
