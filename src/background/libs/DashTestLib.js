@@ -25,10 +25,10 @@ export default class DashTestLibClass{
         this.networks = wallet.networks.DASHTESTNETWORK
     }
 
-    getBalance(raw=true){
+    getBalance(raw=true, address){
         return new Promise(async(resolve,reject)=>{
             try{
-                let address = await this.generateAddAndPriv.generateAddress(DASHTEST);
+                if (!address) address = await this.generateAddAndPriv.generateAddress(DASHTEST);
                 this.validator.validateBtcAddress(address)
                 let url = `${LTCTESTAPIPROVIDER}get_address_balance/DASHTEST/${address}`
                 let result = await this.httpService.getRequest(url).then(response=>response.json());

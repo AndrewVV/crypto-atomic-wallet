@@ -47,11 +47,10 @@ export default class EthereumTestLibClass{
             try{
                 let userAddress = await this.generateAddAndPriv.generateAddress(ETH);
                 let userPrivateKey = await this.generateAddAndPriv.generatePrivKey(ETH);
-                // if(userAddress===to){
-                //     throw new Error('To and From Addresses are the same');
-                // }
                 var data = this.formatTransactionParams(userAddress,to,userPrivateKey,value,gasPrice);
-                return resolve(await this.makeTransaction(data));
+                let raw = await this.makeTransaction(data)
+                let txHash = await this.sendSignedTransaction(raw);
+                return resolve(txHash);
             }catch (e) {
                 return reject(e)
             }
@@ -153,7 +152,6 @@ export default class EthereumTestLibClass{
             }catch (e) {
                 return reject(e);
             }
-
         })
     }
 
@@ -212,17 +210,16 @@ export default class EthereumTestLibClass{
                 let tx = new EthereumTx(txParams);
                 tx.sign(privKeyBuffer);
                 let raw = '0x' + tx.serialize().toString('hex');
-                let result = await this.sendTransactionWithHash(raw);
-                return resolve(result);
+                return resolve(raw);
             }catch(e){
                 return reject(e);
             }
         });
     }
 
-    sendTransactionWithHash(raw_tx){
+    sendSignedTransaction(raw){
         return new Promise(async (resolve,reject)=>{
-            await this.web3.eth.sendSignedTransaction(raw_tx).on('transactionHash', (hash)=>{
+            await this.web3.eth.sendSignedTransaction(raw).on('transactionHash', (hash)=>{
                 return resolve(hash);
             }).on('error',(data)=>{
                 return reject(data);

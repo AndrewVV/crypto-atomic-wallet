@@ -150,7 +150,8 @@ export default class AtomicSwapEthTest extends EthereumTestLib{
         let userPrivateKey = await this.generateAddAndPriv.generatePrivKey(ETH);
         let data = this.contract.methods.initiate(hashedSecret, refundTime, participant).encodeABI();
         let params = this.formatTransactionParams(userAddress,CONTRACT_ADDRESS, userPrivateKey, amount, "", GASLIMITSC, data);
-        let txHash = await this.makeTransaction(params);
+        let raw = await this.makeTransaction(params);
+        let txHash = await this.sendSignedTransaction(raw);
         return txHash;
     }
 
@@ -159,7 +160,8 @@ export default class AtomicSwapEthTest extends EthereumTestLib{
         let userPrivateKey = await this.generateAddAndPriv.generatePrivKey(ETH);
         let data = this.contract.methods.redeem(hashedSecret, secret).encodeABI();
         let params = this.formatTransactionParams(userAddress,CONTRACT_ADDRESS, userPrivateKey, '0', "", GASLIMITSC, data);
-        let txHash = await this.makeTransaction(params);
+        let raw = await this.makeTransaction(params);
+        let txHash = await this.sendSignedTransaction(raw);
         return txHash;
     }
 
@@ -168,7 +170,8 @@ export default class AtomicSwapEthTest extends EthereumTestLib{
         let userPrivateKey = await this.generateAddAndPriv.generatePrivKey(ETH);
         let data = this.contract.methods.refund(hashedSecret).encodeABI();
         let params = this.formatTransactionParams(userAddress,CONTRACT_ADDRESS, userPrivateKey, '0', "", GASLIMITSC, data);
-        let txHash = await this.makeTransaction(params);
+        let raw = await this.makeTransaction(params);
+        let txHash = await this.sendSignedTransaction(raw);
         return txHash;
     }
 

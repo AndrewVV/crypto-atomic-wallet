@@ -7,7 +7,7 @@
     "build-dev": "webpack --config webpack.config.dev.babel.js",
     "watch": "webpack --config webpack.config.watch.babel.js --watch",
     "build-prod": "webpack --config webpack.config.prod.babel.js",
-    "test": "mocha -require esm --timeout 10000"
+    "test": "mocha -require esm --timeout 20000"
   },
   "repository": {
     "type": "git",

@@ -22,10 +22,10 @@ export default class BitcoinLibClass{
         this.networks = wallet.networks.BTCNETWORK
     }
 
-    getBalance(raw=true){
+    getBalance(raw=true, address){
         return new Promise(async(resolve,reject)=>{
             try{
-                let address = await this.generateAddAndPriv.generateAddress(BTC);
+                if (!address) address = await this.generateAddAndPriv.generateAddress(BTC);
                 this.validator.validateBtcAddress(address)
                 let url = `${BTCAPIPROVIDER}addrs/${address}/balance?token=${APITOKENPROD}`;
                 let result = await this.httpService.getRequest(url).then(response=>response.json());
@@ -121,7 +121,7 @@ export default class BitcoinLibClass{
 	            this.validator.validateNumber(amount);
 	            this.validator.validateNumber(fee);
 
-                let balance = await this.getBalance();
+                let balance = await this.getBalance(true, address);
                 if(balance >= amount+fee){
                     let allUtxo = await this.listUnspent(address);
                 	let tmpSum = 0;
@@ -147,7 +147,7 @@ export default class BitcoinLibClass{
                         amount = this.toDecimals(amount)
                         fee = this.toDecimals(fee)
                         balance = this.toDecimals(balance)
-                        alert("Insufficient balance: trying to send "+amount+" BTC + "+fee+" BTC fee when having "+balance+" BTC")
+                        console.log("Insufficient balance: trying to send "+amount+" BTC + "+fee+" BTC fee when having "+balance+" BTC")
 	                }
             }catch(e){
                 return reject(e);
