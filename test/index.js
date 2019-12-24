@@ -19,6 +19,18 @@ const gasPrice = "0x3b9aca00";
 const value = "0x38d7ea4c68000";
 const testRawTxEth = "0xf86c82159d843b9aca0082520894959fd7ef9089b7142b6b908dc3a8af7aa8ff0fa187038d7ea4c68000801ba09221e3037404c09caec0fe99f3ca533e9e186550533828bb53cf1df94f35bfa6a07a522525eeec3ee6e071965b144ad510afc1af4505f4848f15667e589622b0a8"
 
+const secretHash = "0xb3d91bf8a23fa7eb3e26d53440e90a1273030c6eb869a07b04650edd9497b384";
+const ownerPublicKey = "02eca60d98cc3cc2ee0973fb17da325b835708a778eaec2e135e58ab2c40705a64";
+const recipientPublicKey = "0257e80887f60d814c053ccf0856ec780ebc18462fa2ebb92bd8fc2436c813424e";
+const locktime = 1577185132;
+let scriptValues = {
+    secretHash,
+    ownerPublicKey,
+    recipientPublicKey,
+    locktime
+}
+let testScriptAddress = "2N9EGTVfff9P5ztZx7os23aWCBtn2k45Z1z";
+
 if(process.env.ENVIRONMENT_BG === "production"){
     describe("Start of tests", () => {
         it("Test randomizer", async () => {
@@ -207,6 +219,14 @@ if(process.env.ENVIRONMENT_BG === "production"){
     //         expect(rawTx.length).to.above(0)
     //     })
     // })
+
+    describe("ATOMIC SWAP BTCTEST", () => {
+        it("create address script", () => {
+            const {scriptAddress} = walletInterface.atomicSwaps.btctest.createScript(scriptValues)
+            scriptAddress.should.to.be.an("string");
+            expect(scriptAddress).to.equal(testScriptAddress);
+        })
+    })
 }
 
 // test moch
