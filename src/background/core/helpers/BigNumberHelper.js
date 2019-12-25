@@ -1,4 +1,4 @@
-class BigNumberHelper{
+export default class BigNumberHelper{
     static toFixedBigValue(x) {
         if (Math.abs(x) < 1.0) {
             let e = parseInt(x.toString().split('e-')[1]);
@@ -17,4 +17,3 @@ class BigNumberHelper{
         return x;
     }
 }
-module.exports = BigNumberHelper;

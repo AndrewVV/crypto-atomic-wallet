@@ -21180,11 +21180,12 @@ $(document).ready(function () {
         switch (_context7.prev = _context7.next) {
           case 0:
             ticker = document.getElementById("wallet-interface").value;
+            if (ticker === "erc20test") ticker = "ethtest";
             ticker = ticker.toUpperCase();
             data = {
               "ticker": ticker
             };
-            _context7.next = 5;
+            _context7.next = 6;
             return regeneratorRuntime.awrap(new Promise(function (resolve, reject) {
               chrome.runtime.sendMessage({
                 "action": Actions.getBackground().getAddress,
@@ -21194,12 +21195,12 @@ $(document).ready(function () {
               });
             }));
 
-          case 5:
+          case 6:
             result = _context7.sent;
             console.log("Show address: ", result);
             $('#address').html(result);
 
-          case 8:
+          case 9:
           case "end":
             return _context7.stop();
         }

@@ -116,6 +116,7 @@ $(document).ready(function() {
 
     $("#showaddress").click(async()=> {
         let ticker = document.getElementById("wallet-interface").value;
+        if(ticker === "erc20test") ticker = "ethtest"
         ticker = ticker.toUpperCase();
         let data = {"ticker": ticker}
         let result = await new Promise((resolve, reject) => {
