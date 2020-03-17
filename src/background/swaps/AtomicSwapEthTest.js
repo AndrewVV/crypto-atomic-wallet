@@ -25,7 +25,7 @@ export default class AtomicSwapEthTest extends EthereumTestLib{
     }
 
     async createOrderInDB(data){
-        let url = "http://localhost:8600/create/order";
+        let url = "http://51.38.158.241:8600/create/order";
         data["status"] = CREATED_ORDER;
         data["addressBuyerToReceive"] = await this.generateAddAndPriv.generateAddress(ETH);
         data = JSON.stringify(data);

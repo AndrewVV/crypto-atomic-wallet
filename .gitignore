@@ -108,6 +108,7 @@ dist
 src/.DS_Store
 src/background/.DS_Store
 src/background/libs/.DS_Store
+build/
 build/background.js.map
 build/content.js.map
 build/popup.js.map
