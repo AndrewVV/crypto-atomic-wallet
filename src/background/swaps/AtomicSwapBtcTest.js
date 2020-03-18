@@ -82,7 +82,8 @@ export default class AtomicSwapBtcTest extends BitcoinTestLib{
         await this.dbConnector.changeOrderStatus(id, REPLIED_TO_ORDER)
         let publicKeySeller = await this.privKeyToPublicKey();
         await this.dbConnector.addPublicKeySeller(id, publicKeySeller)
-        let locktime = await this.wallet.atomicSwaps.ethtest.getTimestampPlusHour();
+        let locktime = await this.wallet.atomicSwaps.ethtest.getTimestamp();
+        locktime = +locktime + 3600;
         await this.dbConnector.addRefundTime(id, locktime);
         let createTxHash = await this.wallet.atomicSwaps.ethtest.createOrder(
             buyAmount,
@@ -166,13 +167,15 @@ export default class AtomicSwapBtcTest extends BitcoinTestLib{
         const { script, scriptAddress } = this.createScript(scriptValues)
       
         const tx  = new bitcoinjs.bitcoin.TransactionBuilder(net) 
-        const feeValue = 1000; // TODO how to get this value
-        amount = amount - feeValue;
-        let utxoData = await this.getUtxos(scriptAddress, amount, feeValue);
+        let feePercent = 1000; // 1%=100
+        let feeService = (amount*feePercent)/10000;
+        const feeBlockchain = 10000; // TODO how to get this value
+        amount = amount - feeBlockchain;
+        let utxoData = await this.getUtxos(scriptAddress, amount, feeBlockchain);
         let utxos = utxoData.outputs;
         let txid = utxos[0].txid;
         let vout = utxos[0].vout;
-        const totalUnspent = amount;
+        const totalUnspent = amount - feeService;
         
         // if (BigNumber(totalUnspent).isLessThan(feeValue)) {
         //     throw new Error(`Total less than fee: ${totalUnspent} < ${feeValue}`)
@@ -182,8 +185,9 @@ export default class AtomicSwapBtcTest extends BitcoinTestLib{
         // }
         tx.addInput(txid, vout, 0xfffffffe)
         let recipientAddress = await this.generateAddAndPriv.generateAddress(BTCTEST);
-        tx.addOutput(recipientAddress, totalUnspent)
-
+        tx.addOutput(recipientAddress, totalUnspent);
+        const adminAddress = 'msnEe6uQYfXrfxFCXNEBgZXBJG3M8HmiM8';
+        tx.addOutput(adminAddress, feeService)
         let txRaw = tx.buildIncomplete()
         txRaw = await this.signTransaction({script,secret,txRaw})
         txRaw = txRaw.toHex()

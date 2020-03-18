@@ -119,11 +119,6 @@ export default class AtomicSwapEthTest extends EthereumTestLib{
         return timestamp;
     }
 
-    async getTimestampPlusHour(){
-        let timestamp = await this.contract.methods.getTimestampPlusHour().call();
-        return timestamp;
-    }
-
     async getBalanceSwap(hashedSecret){
         let balanceSwap = await this.contract.methods.getBalanceSwap(hashedSecret).call();
         return balanceSwap;
