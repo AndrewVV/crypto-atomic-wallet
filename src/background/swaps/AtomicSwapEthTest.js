@@ -119,6 +119,11 @@ export default class AtomicSwapEthTest extends EthereumTestLib{
         return timestamp;
     }
 
+    async getFeePercent(){
+        let fee = await this.contract.methods.feePercent().call();
+        return fee;
+    }
+
     async getBalanceSwap(hashedSecret){
         let balanceSwap = await this.contract.methods.getBalanceSwap(hashedSecret).call();
         return balanceSwap;

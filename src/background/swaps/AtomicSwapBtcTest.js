@@ -167,7 +167,7 @@ export default class AtomicSwapBtcTest extends BitcoinTestLib{
         const { script, scriptAddress } = this.createScript(scriptValues)
       
         const tx  = new bitcoinjs.bitcoin.TransactionBuilder(net) 
-        let feePercent = 1000; // 1%=100
+        let feePercent = await this.wallet.atomicSwaps.ethtest.getFeePercent(); // 1%=100
         let feeService = (amount*feePercent)/10000;
         const feeBlockchain = 10000; // TODO how to get this value
         amount = amount - feeBlockchain;
