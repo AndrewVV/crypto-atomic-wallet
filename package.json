@@ -28,7 +28,7 @@
     "jquery": "^3.4.1",
     "mocha": "^6.2.2",
     "moment": "^2.24.0",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.7",
     "random-number-csprng": "^1.0.2",
     "wallet-address-validator": "^0.2.4",
     "web3": "^1.2.2"
